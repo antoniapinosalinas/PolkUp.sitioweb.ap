@@ -1,13 +1,13 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root { --red: #E8231A; --blue: #364a9a; --yellow: #ecc316; --green: #36a936; --dark: #1a1a1a; --light: #f5f4f0; }
 html { scroll-behavior: smooth; }
+
 /* Aquí se aplica Poppins al cuerpo general de la página */
 body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(--dark); overflow-x: hidden; }
 
 #hero { position: relative; height: 100vh; min-height: 640px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #fff; }
-#string-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-#nodes-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
-#varas-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+#string-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+#nodes-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 
 .hero-content { position: relative; z-index: 2; text-align: center; pointer-events: none; display: flex; flex-direction: column; align-items: center; }
 .logo-svg-wrap { width: clamp(320px, 50vw, 600px); display: block; }
@@ -18,20 +18,23 @@ body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(
 .cta-btn:hover { background: #1e2c80; transform: scale(1.03); }
 .hint { pointer-events: none; margin-top: 0.75rem; font-size: 0.72rem; color: #999; letter-spacing: 0.05em; }
 
-.node { position: absolute; border-radius: 50%; cursor: pointer; pointer-events: all; display: flex; align-items: center; justify-content: center; will-change: transform; z-index: 3; }
+/* --- ESTILOS DE LOS NODOS (CÍRCULOS) --- */
+.node { position: absolute; border-radius: 50%; cursor: pointer; pointer-events: all; display: flex; align-items: center; justify-content: center; will-change: transform; z-index: 3; transition: filter 0.3s ease, transform 0.2s; }
 .node::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: white; opacity: 0.8; position: absolute; }
-.node:hover { filter: brightness(1.1); }
+.node:hover { filter: brightness(1.1); transform: scale(1.05); }
+
 .node-red { background: var(--red); }
 .node-blue { background: var(--blue); }
 .node-yellow { background: var(--yellow); }
 .node-green { background: var(--green); }
 .node-ringed { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a; }
 
-.vara-wrap { position: absolute; pointer-events: all; cursor: pointer; z-index: 4; }
-.vara-wrap.active { filter: drop-shadow(0 0 5px gold); }
-.vara-wrap svg { display: block; }
+/* Feedback visual para el nodo seleccionado */
+.node.active { filter: brightness(1.2) drop-shadow(0 0 12px var(--yellow)); z-index: 6; }
+/* -------------------------------------- */
 
 section.content-section { padding: 6rem 2rem; max-width: 920px; margin: 0 auto; }
+
 /* Aquí se aplica Poppins a las etiquetas y títulos */
 .section-label { font-family: 'Poppins', sans-serif; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.9rem; font-weight: 700; }
 .section-title { font-family: 'Poppins', sans-serif; font-size: clamp(1.5rem, 3.5vw, 2.6rem); font-weight: 700; line-height: 1.15; color: var(--dark); margin-bottom: 1.2rem; }

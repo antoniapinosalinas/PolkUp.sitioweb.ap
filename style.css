@@ -193,3 +193,151 @@ footer { position: relative; overflow: hidden; padding: 7rem 2rem 3rem; backgrou
   .gallery-slide.prev { transform: translate(calc(-50% - 48%), -50%) scale(0.75); }
   .gallery-slide.next { transform: translate(calc(-50% + 48%), -50%) scale(0.75); }
 }
+
+/* === GRAN LLAMADO A LA ACCIÓN (CTA EXPERIENCIA WEB) === */
+#experiencia-cta {
+  position: relative;
+  padding: 8rem 2rem;
+  background-color: white; 
+  color: var(--dark); 
+  text-align: center;
+  overflow: hidden;
+  border-top: 1px solid rgba(0,0,0,0.05); 
+}
+
+#experiencia-cta .inner {
+  position: relative;
+  z-index: 2;
+  max-width: 650px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cta-heading {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--dark); 
+  margin-bottom: 1.5rem;
+}
+
+.cta-sub {
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: #555; 
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+/* El súper botón palpitante */
+.cta-btn-large {
+  display: inline-block;
+  background: var(--blue);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 1.2rem 3rem;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(54, 74, 154, 0.3);
+  animation: pulse-border 2s infinite;
+}
+
+.cta-btn-large:hover {
+  transform: translateY(-8px) scale(1.05);
+  background-color: #1e2c80; 
+  box-shadow: 0 20px 50px rgba(54, 74, 154, 0.5);
+}
+
+/* Luces flotantes del fondo (Animaciones caóticas y opacidad reactiva) */
+.bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px); 
+  opacity: 0.2; 
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bg-yellow { 
+  background: var(--yellow); 
+  width: 450px; 
+  height: 450px; 
+  top: -100px; 
+  left: -100px; 
+  animation: float-yellow 15s infinite ease-in-out;
+}
+
+.bg-red { 
+  background: var(--red); 
+  width: 350px; 
+  height: 350px; 
+  bottom: -100px; 
+  right: -50px; 
+  animation: float-red 18s infinite ease-in-out; 
+}
+
+.bg-blue { 
+  background: var(--blue); 
+  width: 400px; 
+  height: 400px; 
+  top: 20%; 
+  left: 5%; 
+  animation: float-blue 20s infinite ease-in-out; 
+}
+
+/* === KEYFRAMES DE LUCES Y BOTÓN === */
+@keyframes float-yellow {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+  33% { transform: translate(250px, 150px) scale(1.2); opacity: 0.45; } 
+  66% { transform: translate(50px, 250px) scale(0.9); opacity: 0.25; }
+}
+
+@keyframes float-red {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+  33% { transform: translate(-250px, -200px) scale(1.1); opacity: 0.5; } 
+  66% { transform: translate(-100px, -50px) scale(1.3); opacity: 0.3; }
+}
+
+@keyframes float-blue {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.15; }
+  33% { transform: translate(300px, -150px) scale(0.8); opacity: 0.35; }
+  66% { transform: translate(150px, 200px) scale(1.2); opacity: 0.4; } 
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(54, 74, 154, 0.6); }
+  70% { box-shadow: 0 0 0 18px rgba(54, 74, 154, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(54, 74, 154, 0); }
+}
+
+/* === FOOTER MINIMALISTA === */
+footer {
+  padding: 2rem;
+  background-color: #111; 
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.copyright {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  color: #666;
+  letter-spacing: 0.05em;
+}
+
+/* === RESPONSIVE (MEDIA QUERIES) === */
+@media(max-width: 700px) { 
+  .cards-row { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: 1fr; }
+  .gallery-item:first-child { grid-column: 1; }
+}

@@ -2,9 +2,10 @@
 :root { --red: #E8231A; --blue: #364a9a; --yellow: #ecc316; --green: #36a936; --dark: #1a1a1a; --light: #f5f4f0; }
 html { scroll-behavior: smooth; }
 
-/* Aquí se aplica Poppins al cuerpo general de la página */
+/* Cuerpo general de la página */
 body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(--dark); overflow-x: hidden; }
 
+/* --- HERO Y CAPAS --- */
 #hero { position: relative; height: 100vh; min-height: 640px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #fff; }
 #string-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 #nodes-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
@@ -13,7 +14,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(
 .logo-svg-wrap { width: clamp(320px, 50vw, 600px); display: block; }
 .logo-svg-wrap svg, .logo-svg-wrap img { width: 100%; height: auto; }
 
-/* Aquí se aplica Poppins a los botones */
+/* Botones */
 .cta-btn { pointer-events: all; margin-top: 2rem; background: var(--blue); color: white; font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 500; padding: 0.85rem 2.4rem; border: none; border-radius: 999px; cursor: pointer; transition: background 0.2s, transform 0.15s; }
 .cta-btn:hover { background: #1e2c80; transform: scale(1.03); }
 .hint { pointer-events: none; margin-top: 0.75rem; font-size: 0.72rem; color: #999; letter-spacing: 0.05em; }
@@ -31,19 +32,20 @@ body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(
 
 /* Feedback visual para el nodo seleccionado */
 .node.active { filter: brightness(1.2) drop-shadow(0 0 12px var(--yellow)); z-index: 6; }
-/* -------------------------------------- */
 
+/* --- SECCIÓN 1: TRADUCCIÓN DIGITAL (Izquierda, fondo crema heredado) --- */
 section.content-section { padding: 6rem 2rem; max-width: 920px; margin: 0 auto; }
 
-/* Aquí se aplica Poppins a las etiquetas y títulos */
 .section-label { font-family: 'Poppins', sans-serif; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.9rem; font-weight: 700; }
 .section-title { font-family: 'Poppins', sans-serif; font-size: clamp(1.5rem, 3.5vw, 2.6rem); font-weight: 700; line-height: 1.15; color: var(--dark); margin-bottom: 1.2rem; }
 .section-body { font-size: 1rem; font-weight: 300; line-height: 1.85; color: #444; max-width: 560px; }
 
+/* --- SECCIÓN 2: PiX (Centrado, fondo blanco) --- */
 #pix { padding: 6rem 2rem; background: white; }
 #pix .inner { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .pix-box { width: 100%; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
 
+/* --- SECCIÓN 3: COMPONENTES (Centrado, fondo crema) --- */
 #components { padding: 6rem 2rem; background: var(--light); }
 #components .inner { max-width: 920px; margin: 0 auto; text-align: center; }
 .cards-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
@@ -51,21 +53,125 @@ section.content-section { padding: 6rem 2rem; max-width: 920px; margin: 0 auto; 
 
 .comp-custom-icon { width: 90px; height: auto; margin: 0 auto 1.5rem auto; display: block; }
 
-/* Aquí se aplica Poppins a los títulos de las tarjetas */
 .comp-card h3 { font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--blue); margin-bottom: 0.5rem; }
 .comp-card p { font-size: 0.84rem; color: #666; line-height: 1.65; }
 
+/* --- SECCIÓN 4: GALERÍA (Fondo blanco) --- */
 #gallery { padding: 6rem 2rem; background: white; }
 #gallery .inner { max-width: 920px; margin: 0 auto; }
-.gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; }
-.gallery-item { border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; }
-.gallery-item:first-child { grid-column: 1/3; aspect-ratio: 16/9; }
-.gp { width: 100%; height: 100%; display: block; }
-.gp1 { background: linear-gradient(135deg, #b0c0dc, #7a96bc); }
-.gp2 { background: linear-gradient(135deg, #c0d8d0, #80a898); }
-.gp3 { background: linear-gradient(135deg, #d8c8c0, #b09080); }
-.gp4 { background: linear-gradient(135deg, #c8d0c0, #9aaa80); }
+.gallery-carousel { margin-top: 3rem; }
 
+.gallery-track {
+  position: relative;
+  width: 100%;
+  height: clamp(220px, 50vw, 420px);
+  overflow: hidden;
+}
+
+.gallery-slide {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(72%, 560px);
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0.5;
+  z-index: 1;
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+
+.gallery-slide img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  display: block;
+}
+
+.gallery-slide.active {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  z-index: 3;
+  cursor: default;
+}
+
+.gallery-slide.prev {
+  transform: translate(calc(-50% - 58%), -50%) scale(0.8);
+  opacity: 0.5;
+  z-index: 2;
+}
+
+.gallery-slide.next {
+  transform: translate(calc(-50% + 58%), -50%) scale(0.8);
+  opacity: 0.5;
+  z-index: 2;
+}
+
+.gallery-slide.hidden {
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.gallery-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.gallery-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  color: var(--dark);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s, border-color 0.2s, color 0.2s;
+}
+
+.gallery-arrow:hover {
+  background: var(--light);
+  border-color: var(--blue);
+  color: var(--blue);
+  transform: scale(1.05);
+}
+
+.gallery-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.gallery-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.gallery-dot.active {
+  background: var(--blue);
+  transform: scale(1.25);
+}
+
+.gallery-dot:hover:not(.active) {
+  background: var(--red);
+}
+
+/* --- SECCIÓN 5: VIDEO (Centrado, fondo crema) --- */
 #video-section { padding: 6rem 2rem; background: var(--light); }
 #video-section .inner { max-width: 920px; margin: 0 auto; text-align: center; }
 .video-wrapper { position: relative; margin-top: 3rem; border-radius: 20px; overflow: hidden; background: #111; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
@@ -73,14 +179,17 @@ section.content-section { padding: 6rem 2rem; max-width: 920px; margin: 0 auto; 
 .play-btn:hover { transform: scale(1.08); }
 .video-label { color: rgba(255,255,255,0.5); font-size: 0.82rem; letter-spacing: 0.05em; }
 
+/* --- FOOTER --- */
 footer { position: relative; overflow: hidden; padding: 7rem 2rem 3rem; background: white; text-align: center; }
 .fn { position: absolute; border-radius: 50%; }
 .footer-cta-btn { position: relative; z-index: 1; background: var(--blue); color: white; font-family: 'Poppins', sans-serif; font-size: 1rem; font-weight: 500; padding: 1rem 2.8rem; border: none; border-radius: 999px; cursor: pointer; margin-bottom: 2.5rem; display: block; margin-left: auto; margin-right: auto; transition: background 0.2s, transform 0.15s; }
 .footer-cta-btn:hover { background: #1e2c80; transform: scale(1.03); }
 .copyright { position: relative; z-index: 1; font-size: 0.73rem; color: #aaa; letter-spacing: 0.05em; }
 
+/* Media Queries */
 @media(max-width: 700px) { 
   .cards-row { grid-template-columns: 1fr; }
-  .gallery-grid { grid-template-columns: 1fr; }
-  .gallery-item:first-child { grid-column: 1; }
+  .gallery-slide { width: min(82%, 420px); }
+  .gallery-slide.prev { transform: translate(calc(-50% - 48%), -50%) scale(0.75); }
+  .gallery-slide.next { transform: translate(calc(-50% + 48%), -50%) scale(0.75); }
 }

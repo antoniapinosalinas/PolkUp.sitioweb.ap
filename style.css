@@ -33,8 +33,21 @@ body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(
 /* Feedback visual para el nodo seleccionado */
 .node.active { filter: brightness(1.2) drop-shadow(0 0 12px var(--yellow)); z-index: 6; }
 
-/* --- SECCIÓN 1: TRADUCCIÓN DIGITAL (Izquierda, fondo crema heredado) --- */
-section.content-section { padding: 6rem 2rem; max-width: 920px; margin: 0 auto; }
+/* --- SECCIÓN 1: TRADUCCIÓN DIGITAL (Izquierda, fondo crema con circulos difuminados) --- */
+
+section.content-section { 
+  position: relative; 
+  overflow: hidden; 
+  background: var(--light); 
+  width: 100%; 
+  padding: 6rem 2rem; 
+}
+section.content-section .inner { 
+  max-width: 920px; 
+  margin: 0 auto; 
+  position: relative; 
+  z-index: 2; 
+}
 
 .section-label { font-family: 'Poppins', sans-serif; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--blue); margin-bottom: 0.9rem; font-weight: 700; }
 .section-title { font-family: 'Poppins', sans-serif; font-size: clamp(1.5rem, 3.5vw, 2.6rem); font-weight: 700; line-height: 1.15; color: var(--dark); margin-bottom: 1.2rem; }
@@ -49,9 +62,39 @@ section.content-section { padding: 6rem 2rem; max-width: 920px; margin: 0 auto; 
 #components { padding: 6rem 2rem; background: var(--light); }
 #components .inner { max-width: 920px; margin: 0 auto; text-align: center; }
 .cards-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
-.comp-card { background: white; border-radius: 16px; padding: 2rem 1.5rem; border: 1.5px solid rgba(0,0,0,0.06); text-align: center; }
+.comp-card { background: white; border-radius: 16px; padding: 2.5rem 1.5rem; border: 1.5px solid rgba(0,0,0,0.06); text-align: center; }
 
-.comp-custom-icon { width: 90px; height: auto; margin: 0 auto 1.5rem auto; display: block; }
+/* 
+   CAMBIO: Se creó un contenedor de iconos (.comp-icon-wrap) con altura fija (100px) 
+   y centrado flexbox. Esto garantiza que todos los títulos h3 comiencen exactamente 
+   en la misma altura horizontal, sin importar las proporciones de la imagen.
+   Además, se ajustó el tamaño individual de los iconos para equilibrar su peso visual:
+   los dos primeros (PNGs cuadrados) son un poco más grandes, y el tercero (SVG rectangular) 
+   es más angosto para que no se vea desproporcionado.
+*/
+.comp-icon-wrap {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.comp-custom-icon {
+  display: block;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.comp-card:nth-child(1) .comp-custom-icon,
+.comp-card:nth-child(2) .comp-custom-icon {
+  width: 110px; /* PNGs un poco más grandes para destacar */
+}
+
+.comp-card:nth-child(3) .comp-custom-icon {
+  width: 75px;  /* SVG rectangular más angosto para equilibrar el peso visual */
+}
 
 .comp-card h3 { font-family: 'Poppins', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--blue); margin-bottom: 0.5rem; }
 .comp-card p { font-size: 0.84rem; color: #666; line-height: 1.65; }
@@ -194,7 +237,7 @@ footer { position: relative; overflow: hidden; padding: 7rem 2rem 3rem; backgrou
   .gallery-slide.next { transform: translate(calc(-50% + 48%), -50%) scale(0.75); }
 }
 
-/* === GRAN LLAMADO A LA ACCIÓN (CTA EXPERIENCIA WEB) === */
+/* ===  SECCIÓN 6: EXPERIENCIA WEB (Centrado, fondo VIDEO LOOP) === */
 #experiencia-cta {
   position: relative;
   min-height: max(750px, 100vh);
@@ -264,7 +307,7 @@ footer { position: relative; overflow: hidden; padding: 7rem 2rem 3rem; backgrou
   text-shadow: 0 1px 8px rgba(255, 255, 255, 0.85);
 }
 
-/* El súper botón palpitante */
+/* El botón palpitante */
 .cta-btn-large {
   display: inline-block;
   background: var(--blue);
@@ -290,40 +333,51 @@ footer { position: relative; overflow: hidden; padding: 7rem 2rem 3rem; backgrou
 }
 
 /* Luces flotantes del fondo (Animaciones caóticas y opacidad reactiva) */
+
 .bg-glow {
   position: absolute;
   border-radius: 50%;
   filter: blur(80px); 
-  opacity: 0.2; 
+  opacity: 0.18; 
   z-index: 1;
   pointer-events: none;
 }
 
 .bg-yellow { 
   background: var(--yellow); 
-  width: 450px; 
-  height: 450px; 
-  top: -100px; 
-  left: -100px; 
+  width: 380px; 
+  height: 380px; 
+  top: 5%; 
+  left: -120px; 
   animation: float-yellow 15s infinite ease-in-out;
 }
 
 .bg-red { 
   background: var(--red); 
-  width: 350px; 
-  height: 350px; 
-  bottom: -100px; 
-  right: -50px; 
+  width: 320px; 
+  height: 320px; 
+  bottom: 5%; 
+  right: -100px; 
   animation: float-red 18s infinite ease-in-out; 
 }
 
 .bg-blue { 
   background: var(--blue); 
-  width: 400px; 
-  height: 400px; 
-  top: 20%; 
-  left: 5%; 
+  width: 350px; 
+  height: 350px; 
+  top: 35%; 
+  left: 20%; 
   animation: float-blue 20s infinite ease-in-out; 
+}
+
+
+.bg-green {
+  background: var(--green);
+  width: 330px;
+  height: 330px;
+  bottom: 15%;
+  left: -50px;
+  animation: float-green 22s infinite ease-in-out;
 }
 
 /* === KEYFRAMES DE LUCES Y BOTÓN === */
@@ -345,13 +399,23 @@ footer { position: relative; overflow: hidden; padding: 7rem 2rem 3rem; backgrou
   66% { transform: translate(150px, 200px) scale(1.2); opacity: 0.4; } 
 }
 
+/* 
+   CAMBIO: Se añadieron los keyframes para la animación de flotabilidad del orbe verde, 
+   usando trayectorias y tiempos desfasados para generar un movimiento orgánico y caótico.
+*/
+@keyframes float-green {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.15; }
+  33% { transform: translate(180px, -120px) scale(1.2); opacity: 0.38; }
+  66% { transform: translate(-100px, -220px) scale(0.9); opacity: 0.22; }
+}
+
 @keyframes pulse-border {
   0% { box-shadow: 0 0 0 0 rgba(54, 74, 154, 0.6); }
   70% { box-shadow: 0 0 0 18px rgba(54, 74, 154, 0); }
   100% { box-shadow: 0 0 0 0 rgba(54, 74, 154, 0); }
 }
 
-/* === FOOTER MINIMALISTA === */
+/* === FOOTER === */
 footer {
   padding: 2rem;
   background-color: #111; 
@@ -372,4 +436,225 @@ footer {
   .cards-row { grid-template-columns: 1fr; }
   .gallery-grid { grid-template-columns: 1fr; }
   .gallery-item:first-child { grid-column: 1; }
+}
+
+
+/* ================================================================
+   MICROINTERACCIONES — Scroll · Reveal · Énfasis · Tilt · Hero
+   Todos los efectos usan @keyframes o transition CSS puro.
+   No se necesita ninguna librería externa.
+   ================================================================ */
+
+
+/* ---------------------------------------------------------------
+   BARRA DE PROGRESO DE SCROLL
+   Una línea delgada fija en la parte superior de la pantalla que
+   se llena de izquierda a derecha conforme el usuario hace scroll.
+   El ancho (width) lo actualiza JavaScript en tiempo real.
+   Se usa will-change: width para que el navegador la optimice en GPU.
+   --------------------------------------------------------------- */
+#scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--blue) 0%, var(--red) 60%, var(--yellow) 100%);
+  z-index: 9999;
+  pointer-events: none;
+  will-change: width;
+  border-radius: 0 2px 2px 0;
+}
+
+
+/* ---------------------------------------------------------------
+   ANIMACIÓN GENÉRICA DE ENTRADA POR SCROLL (reveal-rise)
+   Los elementos que tengan la clase .reveal comienzan invisibles.
+   Cuando el IntersectionObserver en JS detecta que el elemento
+   entra en el viewport, agrega la clase .visible y se dispara
+   esta animación: el elemento sube desde abajo y aparece.
+   Se usa @keyframes en lugar de transition para que no interfiera
+   con las transiciones de hover que los elementos ya tienen.
+   --------------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+}
+.reveal.visible {
+  animation: reveal-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes reveal-rise {
+  from { opacity: 0; transform: translateY(38px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Las cards reciben un data-delay distinto cada una para que
+   aparezcan en cascada (stagger) en lugar de todas a la vez. */
+.reveal[data-delay="1"] { animation-delay: 0.08s; }
+.reveal[data-delay="2"] { animation-delay: 0.18s; }
+.reveal[data-delay="3"] { animation-delay: 0.28s; }
+
+
+/* ---------------------------------------------------------------
+   SUBRAYADO ANIMADO EN LAS ETIQUETAS DE SECCIÓN
+   El ::after de cada .section-label empieza con width: 0.
+   Cuando JS detecta que la etiqueta entra en pantalla y agrega
+   la clase .label-visible, el subrayado se expande hasta cubrir
+   todo el texto con una transición suave.
+   --------------------------------------------------------------- */
+.section-label {
+  position: relative;
+  display: inline-block;
+}
+.section-label::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0;
+  width: 0; height: 1.5px;
+  background: var(--blue);
+  transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
+}
+.section-label.label-visible::after {
+  width: 100%;
+}
+
+
+/* ---------------------------------------------------------------
+   TÍTULOS: CADA PALABRA ENTRA POR SEPARADO (word-fly-up)
+   JS divide el texto de .section-title y .cta-heading en <span>
+   individuales con clase .word. Cada span comienza invisible y
+   desplazado hacia abajo. Cuando el título entra en el viewport,
+   JS agrega .title-visible y las palabras aparecen una por una
+   con un pequeño skew para darle carácter tipográfico.
+   Además, para que se sienta vivo y experimental, las palabras
+   nacen con el color azul de la marca (var(--blue)) y transicionan
+   suavemente al color oscuro final (var(--dark)).
+   El delay de cada <span> lo calcula JS según su posición.
+   --------------------------------------------------------------- */
+.section-title .word,
+.cta-heading .word {
+  display: inline-block;
+  opacity: 0;
+  will-change: opacity, transform, color;
+}
+.section-title.title-visible .word,
+.cta-heading.title-visible .word {
+  animation: word-fly-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes word-fly-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(24px) skewX(-5deg); 
+    color: var(--blue);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0)   skewX(0deg);   
+    color: var(--dark);
+  }
+}
+
+
+/* ---------------------------------------------------------------
+   ENTRADA DEL HERO AL CARGAR LA PÁGINA
+   El logo, el botón CTA y el hint del hero aparecen con
+   animaciones encadenadas apenas carga la página (no requieren
+   scroll). Cada uno tiene un animation-delay distinto para que
+   entren en orden: logo → botón → hint.
+   --------------------------------------------------------------- */
+.logo-svg-wrap {
+  animation: hero-logo-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+.cta-btn {
+  animation: hero-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+.hint {
+  animation: hero-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.7s both;
+}
+@keyframes hero-logo-in {
+  from { opacity: 0; transform: scale(0.88) translateY(18px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+
+/* ---------------------------------------------------------------
+   TARJETAS DE COMPONENTES: HOVER CON TILT 3D + ICONO BOUNCE
+   .cards-row tiene perspective para que los hijos puedan rotar
+   en el espacio 3D. .comp-card usa transform-style: preserve-3d
+   para que el tilt calculado por JS (rotateX/rotateY) se vea real.
+   El icono tiene una curva bezier con overshoot (1.56) que produce
+   el efecto de rebote elástico al hacer hover.
+   --------------------------------------------------------------- */
+.cards-row {
+  perspective: 1400px;
+}
+.comp-card {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.32s ease,
+              border-color 0.32s ease;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+.comp-card:hover {
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.10);
+  border-color: rgba(54, 74, 154, 0.2);
+}
+.comp-custom-icon {
+  transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.comp-card:hover .comp-custom-icon {
+  transform: scale(1.13) translateY(-5px);
+}
+
+
+
+/* ---------------------------------------------------------------
+   PULSO EN EL NODO ACTIVO DEL HERO
+   Cuando el usuario hace clic en un nodo del juego y queda
+   seleccionado (clase .active), el drop-shadow amarillo oscila
+   suavemente entre un brillo menor y uno mayor de forma infinita,
+   reforzando visualmente que ese nodo está "conectado".
+   --------------------------------------------------------------- */
+.node.active {
+  filter: brightness(1.25) drop-shadow(0 0 14px var(--yellow));
+  animation: node-pulse 1.8s ease-in-out infinite alternate;
+}
+@keyframes node-pulse {
+  from { filter: brightness(1.2) drop-shadow(0 0 10px var(--yellow)); }
+  to   { filter: brightness(1.3) drop-shadow(0 0 22px var(--yellow)); }
+}
+
+
+/* ---------------------------------------------------------------
+   SOMBRA SUAVE EN LA CAJA PiX AL HACER HOVER
+   El contenedor del iframe de la partitura PiX gana una sombra
+   azulada al pasar el cursor, dando retroalimentación de que
+   el área es interactiva.
+   --------------------------------------------------------------- */
+.pix-box {
+  transition: box-shadow 0.4s ease;
+}
+.pix-box:hover {
+  box-shadow: 0 16px 48px rgba(54, 74, 154, 0.12);
+}
+
+
+/* ---------------------------------------------------------------
+   MODO SIN MOVIMIENTO (prefers-reduced-motion)
+   Si el sistema operativo del usuario tiene activada la opción
+   "Reducir movimiento", se desactivan todas las animaciones y
+   transiciones. Los elementos aparecen directamente en su estado
+   final, sin animaciones de entrada ni efectos de scroll.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  #scroll-progress { display: none; }
+  .reveal, .reveal.visible { opacity: 1; animation: none; }
+  .section-label::after { width: 100%; transition: none; }
+  .section-title .word, .cta-heading .word { opacity: 1; animation: none; }
+  .section-title.title-visible { animation: none; background: none; -webkit-text-fill-color: unset; }
+  .logo-svg-wrap, .cta-btn, .hint { animation: none; }
+  .comp-card, .comp-custom-icon, .pix-box { transition: none; }
+  .node.active { animation: none; }
 }

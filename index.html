@@ -8,6 +8,8 @@
 </head>
 <body>
 
+<div id="scroll-progress" aria-hidden="true"></div>
+
 <section id="hero">
   <canvas id="string-canvas"></canvas>
   <div id="nodes-layer"></div>
@@ -20,10 +22,17 @@
   </div>
 </section>
 
+
 <section class="content-section">
-  <div class="section-label">Fundamento</div>
-  <h2 class="section-title">Traducción Digital<br>de la Experiencia</h2>
-  <p class="section-body">PolkUp es originalmente un juego de mesa físico basado en una torre modular tridimensional y el equilibrio táctil. El desafío de este proyecto no fue crear una réplica literal del tablero, sino realizar una traducción digital de sus momentos clave de interacción. El objetivo fue capturar la relatividad del espacio, la tensión del azar y el impacto del castigo a través de una interfaz abstracta, tomando como base el mapeo conductual de nuestra Partitura PiX</p>
+  <div class="bg-glow bg-yellow" aria-hidden="true"></div>
+  <div class="bg-glow bg-red"    aria-hidden="true"></div>
+  <div class="bg-glow bg-blue"   aria-hidden="true"></div>
+  <div class="bg-glow bg-green"  aria-hidden="true"></div>
+  <div class="inner">
+    <div class="section-label">Fundamento</div>
+    <h2 class="section-title">Traducción Digital<br>de la Experiencia</h2>
+    <p class="section-body">PolkUp es originalmente un juego de mesa físico basado en una torre modular tridimensional y el equilibrio táctil. El desafío de este proyecto no fue crear una réplica literal del tablero, sino realizar una traducción digital de sus momentos clave de interacción. El objetivo fue capturar la relatividad del espacio, la tensión del azar y el impacto del castigo a través de una interfaz abstracta, tomando como base el mapeo conductual de nuestra Partitura PiX</p>
+  </div>
 </section>
 
 <div id="pix">
@@ -53,20 +62,31 @@
     <p class="section-body" style="margin: 0 auto 3rem auto;">La idea principal de este proyecto es tomar las sensaciones y los momentos de mayor tensión que vimos en las partituras de interacción (PiX) y llevarlos a una página web experimental.</p>
 
   <div class="cards-row">
+      <!-- 
+        CAMBIO: Se envolvieron las imágenes en un contenedor .comp-icon-wrap con altura fija 
+        para garantizar que los títulos (h3) y textos de todas las tarjetas comiencen exactamente 
+        en el mismo eje horizontal, logrando una alineación perfecta.
+      -->
       <div class="comp-card">
-        <img src="assets/superficierelativa.png" alt="Superficie Relativa" class="comp-custom-icon">
+        <div class="comp-icon-wrap">
+          <img src="assets/superficierelativa.png" alt="Superficie Relativa" class="comp-custom-icon">
+        </div>
         <h3>Superficie Relativa</h3>
         <p>En el juego físico, la torre rota cambiando las rutas. En la interfaz, esta tridimensionalidad se insinúa mediante la deformación de la perspectiva.</p>
       </div>
 
       <div class="comp-card">
-        <img src="assets/azar.png" alt="Azar" class="comp-custom-icon">
+        <div class="comp-icon-wrap">
+          <img src="assets/azar.png" alt="Azar" class="comp-custom-icon">
+        </div>
         <h3>Azar</h3>
         <p>El dado mecánico se traduce en un componente emergente de carga, replicando la anticipación y el momento de sorpresa antes de revelar su nuevo punto de apoyo.</p>
       </div>
 
       <div class="comp-card">
-        <img src="assets/condicion.svg" alt="Condición" class="comp-custom-icon">
+        <div class="comp-icon-wrap">
+          <img src="assets/condicion.svg" alt="Condición" class="comp-custom-icon">
+        </div>
         <h3>Condición</h3>
         <p>El riesgo de caída y las cartas de condición se representan mediante una alerta que rompe el flujo visual y fuerza al usuario a retroceder de nivel, emulando la frustración táctica del juego real.</p>
       </div>
@@ -131,6 +151,7 @@
     
   </div>
 </div>
+
 
 <div id="experiencia-cta">
   <div class="cta-video-bg" aria-hidden="true">

@@ -118,12 +118,12 @@ function redraw(){
   ctx.beginPath();
   ctx.moveTo(a.x, a.y);
   ctx.quadraticCurveTo(mx, my, b.x, b.y);
-  ctx.strokeStyle = '#008e45';
+  ctx.strokeStyle = '#000000';
   ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.stroke();
 
-  // Dibujar un pequeño "botón" en el centro para simular que entra en el agujero
+  // Dibujar un pequeño boton en el centro para simular que entra en el agujero
   ctx.fillStyle = '#008e45';
   ctx.beginPath(); ctx.arc(a.x, a.y, 6, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, Math.PI*2); ctx.fill();

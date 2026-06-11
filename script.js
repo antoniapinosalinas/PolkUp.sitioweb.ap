@@ -114,17 +114,102 @@ function redraw(){
   const mx = (a.x+b.x)/2;
   const my = (a.y+b.y)/2 + sag;
   
-  // Dibujar la curva del hilo
+  // Longitud aproximada de la curva para calcular los pasos
+  const approxLength = dist * 1.08;
+  const spacing = 3; // Un paso cada 3 píxeles para un trenzado continuo y suave
+  const steps = Math.max(20, Math.floor(approxLength / spacing));
+  
+  // Función determinista para evitar parpadeos en la animación de las pelusas
+  function pseudoRandom(seed) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+  
+  const fiberData = [];
+  
+  // 1. Dibujamos el cuerpo base de la lana (un poco más grueso y suave)
   ctx.beginPath();
   ctx.moveTo(a.x, a.y);
   ctx.quadraticCurveTo(mx, my, b.x, b.y);
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#4a4a4a'; // Gris oscuro suave (más sutil que el negro puro)
+  ctx.lineWidth = 5.5;
   ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   ctx.stroke();
+  
+  // 2. Dibujamos el patrón trenzado encima
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    
+    // Punto en la curva de Bezier cuadrática
+    const mt = 1 - t;
+    const px = mt * mt * a.x + 2 * mt * t * mx + t * t * b.x;
+    const py = mt * mt * a.y + 2 * mt * t * my + t * t * b.y;
+    
+    // Tangente en ese punto
+    const tx_val = 2 * mt * (mx - a.x) + 2 * t * (b.x - mx);
+    const ty_val = 2 * mt * (my - a.y) + 2 * t * (b.y - my);
+    const len = Math.hypot(tx_val, ty_val);
+    if (len === 0) continue;
+    
+    const tx = tx_val / len;
+    const ty = ty_val / len;
+    const nx = -ty;
+    const ny = tx;
+    
+    const seed = i + nodeA * 17 + nodeB * 43;
+    const rand1 = pseudoRandom(seed);
+    const rand2 = pseudoRandom(seed + 1);
+    const rand3 = pseudoRandom(seed + 2);
+    
+    // Alternamos entre un color de hebra más claro y uno más oscuro para simular el trenzado
+    const isLightStrand = (i % 2 === 0);
+    ctx.strokeStyle = isLightStrand ? '#707070' : '#383838';
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    
+    ctx.beginPath();
+    // Línea diagonal que cruza el hilo de forma inclinada
+    const xStart = px - nx * 2.2 + tx * 1.5;
+    const yStart = py - ny * 2.2 + ty * 1.5;
+    const xEnd = px + nx * 2.2 - tx * 1.5;
+    const yEnd = py + ny * 2.2 - ty * 1.5;
+    ctx.moveTo(xStart, yStart);
+    ctx.lineTo(xEnd, yEnd);
+    ctx.stroke();
+    
+    // Guardar información de pelusas para dibujarlas sobre el hilo
+    if (rand1 < 0.18) {
+      fiberData.push({
+        px, py,
+        length: 3.5 + rand2 * 5,
+        angle: rand3 * Math.PI * 2,
+        seed
+      });
+    }
+  }
+  
+  // 3. Dibujamos las pelusas/fibras de lana sobresaliendo del hilo
+  ctx.lineWidth = 0.75;
+  fiberData.forEach(f => {
+    const rand4 = pseudoRandom(f.seed + 3);
+    const rand5 = pseudoRandom(f.seed + 4);
+    
+    ctx.strokeStyle = rand4 > 0.5 ? '#656565' : '#4a4a4a';
+    ctx.beginPath();
+    ctx.moveTo(f.px, f.py);
+    
+    const cpX = f.px + Math.cos(f.angle) * f.length * 0.5 + (rand4 - 0.5) * 3;
+    const cpY = f.py + Math.sin(f.angle) * f.length * 0.5 + (rand5 - 0.5) * 3;
+    const endX = f.px + Math.cos(f.angle) * f.length;
+    const endY = f.py + Math.sin(f.angle) * f.length;
+    
+    ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+    ctx.stroke();
+  });
 
-  // Dibujar un pequeño boton en el centro para simular que entra en el agujero
-  ctx.fillStyle = '#008e45';
+  // Dibujar un pequeño botón en el centro para simular que entra en el agujero
+  ctx.fillStyle = '#4a4a4a'; // Gris oscuro suave a juego con la lana
   ctx.beginPath(); ctx.arc(a.x, a.y, 6, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(b.x, b.y, 6, 0, Math.PI*2); ctx.fill();
 }

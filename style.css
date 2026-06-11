@@ -24,14 +24,14 @@ body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(
 .node::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: white; opacity: 0.8; position: absolute; }
 .node:hover { filter: brightness(1.1); transform: scale(1.05); }
 
-.node-red { background: var(--red); }
-.node-blue { background: var(--blue); }
-.node-yellow { background: var(--yellow); }
-.node-green { background: var(--green); }
+.node-red    { background: var(--red);    --glow-color: var(--red); }
+.node-blue   { background: var(--blue);   --glow-color: var(--blue); }
+.node-yellow { background: var(--yellow); --glow-color: var(--yellow); }
+.node-green  { background: var(--green);  --glow-color: var(--green); }
 .node-ringed { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a; }
 
 /* Feedback visual para el nodo seleccionado */
-.node.active { filter: brightness(1.2) drop-shadow(0 0 12px var(--yellow)); z-index: 6; }
+.node.active { filter: brightness(1.2) drop-shadow(0 0 12px var(--glow-color)); z-index: 6; }
 
 /* --- SECCIÓN 1: TRADUCCIÓN DIGITAL (Izquierda, fondo crema con circulos difuminados) --- */
 
@@ -456,13 +456,14 @@ footer {
 #scroll-progress {
   position: fixed;
   top: 0; left: 0;
-  height: 3px;
+  height: 5px;
   width: 0%;
   background: linear-gradient(90deg, var(--blue) 0%, var(--red) 60%, var(--yellow) 100%);
   z-index: 9999;
   pointer-events: none;
   will-change: width;
-  border-radius: 0 2px 2px 0;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 }
 
 
@@ -618,12 +619,12 @@ footer {
    reforzando visualmente que ese nodo está "conectado".
    --------------------------------------------------------------- */
 .node.active {
-  filter: brightness(1.25) drop-shadow(0 0 14px var(--yellow));
+  filter: brightness(1.25) drop-shadow(0 0 14px var(--glow-color));
   animation: node-pulse 1.8s ease-in-out infinite alternate;
 }
 @keyframes node-pulse {
-  from { filter: brightness(1.2) drop-shadow(0 0 10px var(--yellow)); }
-  to   { filter: brightness(1.3) drop-shadow(0 0 22px var(--yellow)); }
+  from { filter: brightness(1.2) drop-shadow(0 0 10px var(--glow-color)); }
+  to   { filter: brightness(1.3) drop-shadow(0 0 22px var(--glow-color)); }
 }
 
 

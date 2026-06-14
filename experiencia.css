@@ -1,0 +1,299 @@
+/* ── Reset & Base ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --c-red:    #E8231A;
+  --c-green:  #36a936;
+  --c-yellow: #ecc316;
+  --c-blue:   #364a9a;
+  --c-dark:   #1a1a1a;
+  --c-bg:     #ffffff;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  background: var(--c-bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hidden { display: none !important; }
+
+/* ── Back button ─────────────────────────────────────────────────────────────── */
+.back-btn {
+  position: fixed; top: 1.4rem; left: 1.4rem;
+  font-size: 1.75rem; line-height: 1;
+  color: #333; text-decoration: none;
+  z-index: 200; transition: opacity 0.2s; user-select: none;
+}
+.back-btn:hover { opacity: 0.55; }
+
+/* ── HUD ─────────────────────────────────────────────────────────────────────── */
+.game-hud {
+  position: fixed; bottom: 1.2rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 2rem; align-items: center;
+  z-index: 200;
+  background: rgba(255,255,255,0.78);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 999px; padding: 0.5rem 1.6rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.hud-item  { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.hud-label { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #999; }
+.hud-value { font-size: 13px; font-weight: 600; color: var(--c-dark); }
+.hud-color-item { flex-direction: row; gap: 6px; align-items: center; }
+.hud-color-dot  { width: 12px; height: 12px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
+
+/* ── Game scene: contexto 3D ─────────────────────────────────────────────────── */
+/*
+ * perspective: 900px   → foreshortening moderado, sin distorsión agresiva
+ * perspective-origin: 50% 44%  → punto de fuga aprox. a la mitad del área de juego
+ *   Con top:52% el nodo activo queda en 52% de pantalla (debajo del punto de fuga),
+ *   AL+1 en ~37%, AL+2 en ~20%.  Ningún nivel visible cruza el punto de fuga,
+ *   evitando el efecto "punto microscópico" de la versión anterior (26%).
+ */
+#game-scene {
+  position: fixed; inset: 0; z-index: 1;
+  perspective: 900px;
+  perspective-origin: 50% 44%;
+}
+
+/* ── Tower scene ─────────────────────────────────────────────────────────────── */
+/*
+ * top: 52%  → el nodo activo se posiciona aproximadamente en la mitad inferior
+ *             de la pantalla, dejando espacio visible para AL+1 (≈35%) y AL+2 (≈18%).
+ *             El HUD (bottom:1.5rem) queda siempre por debajo del nodo activo.
+ */
+#tower-scene {
+  position: absolute; left: 50%; top: 52%;
+  transform-style: preserve-3d;
+  cursor: grab;
+}
+#tower-scene:active { cursor: grabbing; }
+
+/* ── Rope SVG ─────────────────────────────────────────────────────────────────── */
+#rope-svg {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 10; overflow: visible;
+}
+.rope-path {
+  fill: none; stroke: #1a1a1a; stroke-width: 1.6px;
+  stroke-linecap: round; filter: url(#rope-shadow);
+}
+.rope-knot { fill: #1a1a1a; }
+
+/* ── Node wrapper (posición 3D fija) ─────────────────────────────────────────── */
+.node-wrap {
+  position: absolute;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+/* ── Node visual ─────────────────────────────────────────────────────────────── */
+/* cursor: default → el fondo del nodo NO es clickeable                           */
+.node {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  cursor: default;
+  transform-origin: center center;
+  will-change: transform;
+  position: relative;
+  transition: box-shadow 0.18s ease;
+}
+
+/* ── Hitbox: ÚNICO punto blanco clickeable ───────────────────────────────────── */
+/* pointer-events se activa por JS sólo cuando el nodo está en state.validIds     */
+.node-dot {
+  position: absolute;
+  width: 20%; height: 20%;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;    /* JS lo pone a 'auto' para nodos válidos */
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* ── Colores de nodo ──────────────────────────────────────────────────────────── */
+.node-red    { background: var(--c-red); }
+.node-green  { background: var(--c-green); }
+.node-yellow { background: var(--c-yellow); }
+.node-blue   { background: var(--c-blue); }
+
+/* ── Nodo de condición: borde negro permanente (siempre visible) ─────────────── */
+.node-condition {
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a;
+}
+
+/* ── Cima: único círculo negro sólido ─────────────────────────────────────────── */
+.node-cima {
+  background: #000;
+  box-shadow: 0 0 0 3px #fff, 0 0 20px rgba(0,0,0,0.55);
+}
+.node-cima .node-dot { background: rgba(255,255,255,0.50); }
+
+/* ── Nodo activo: resplandor blanco (SIN borde negro — reservado para condición) */
+.node.active {
+  box-shadow: 0 0 0 2.5px rgba(255,255,255,0.96), 0 0 22px 5px rgba(255,255,255,0.42);
+}
+.node-condition.active {
+  /* Preserva el anillo negro + añade el glow blanco */
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a, 0 0 22px 5px rgba(255,255,255,0.35);
+}
+
+/* ── Nodo válido: el dot pulsa (SIN borde extra en el nodo) ─────────────────── */
+.node.valid .node-dot {
+  background: rgba(255, 255, 255, 1);
+  animation: dot-pulse 1.15s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { transform: translate(-50%,-50%) scale(1.00); }
+  50%       { transform: translate(-50%,-50%) scale(1.45); }
+}
+
+/* ── Hover glow por color (clase .glowing aplicada por JS) ──────────────────── */
+/* CRÍTICO: se usa glow del color del nodo, nunca borde negro                     */
+.node-red.glowing    { box-shadow: 0 0 28px 8px rgba(232,  35,  26, 0.80); }
+.node-blue.glowing   { box-shadow: 0 0 28px 8px rgba( 54,  74, 154, 0.78); }
+.node-yellow.glowing { box-shadow: 0 0 28px 8px rgba(236, 195,  22, 0.88); }
+.node-green.glowing  { box-shadow: 0 0 28px 8px rgba( 54, 169,  54, 0.78); }
+.node-cima.glowing   { box-shadow: 0 0 28px 8px rgba(  0,   0,   0, 0.65); }
+
+/* Combina glow con borde de condición (para condición+hover) */
+.node-condition.node-red.glowing    { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a, 0 0 26px 7px rgba(232, 35, 26, 0.70); }
+.node-condition.node-blue.glowing   { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a, 0 0 26px 7px rgba(54, 74, 154, 0.70); }
+.node-condition.node-yellow.glowing { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a, 0 0 26px 7px rgba(236,195, 22, 0.80); }
+.node-condition.node-green.glowing  { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #1a1a1a, 0 0 26px 7px rgba(54, 169, 54, 0.70); }
+
+/* ── Flash de nivel ─────────────────────────────────────────────────────────── */
+.level-flash {
+  position: fixed; top: 42%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.1rem; font-weight: 600;
+  color: var(--c-dark);
+  background: rgba(255,255,255,0.92);
+  padding: 0.4rem 1.2rem; border-radius: 999px;
+  z-index: 300; pointer-events: none;
+  animation: flash-up 0.7s ease forwards;
+}
+@keyframes flash-up {
+  0%   { opacity: 1; transform: translate(-50%, -50%); }
+  100% { opacity: 0; transform: translate(-50%, -130%); }
+}
+
+/* ── Modal overlay ────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500;
+  background: rgba(200,200,210,0.15);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: rgba(255,255,255,0.54);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,0.70);
+  border-radius: 24px;
+  padding: 2.5rem 2rem 2rem;
+  text-align: center;
+  width: min(340px, 86vw);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+}
+
+.intro-brand    { font-size: 2rem !important; font-weight: 700 !important; letter-spacing: -0.02em; color: var(--c-blue) !important; margin-bottom: 0.5rem !important; }
+.modal-title    { font-size: 18px; font-weight: 600; color: var(--c-dark); margin-bottom: 4px; }
+.modal-title-large { font-size: 22px; font-weight: 700; color: var(--c-dark); margin-bottom: 6px; }
+.modal-subtitle { font-size: 14px; font-weight: 300; color: #555; margin-bottom: 1.6rem; line-height: 1.55; }
+.roulette-sub   { margin-top: 2px; margin-bottom: 1rem; }
+.modal-icon     { font-size: 2rem; margin-bottom: 0.5rem; }
+.modal-hint     { font-size: 12px; font-weight: 500; color: #888; letter-spacing: 0.04em; margin-bottom: 1.4rem; text-transform: uppercase; }
+
+/* ── Botón Comenzar ──────────────────────────────────────────────────────────── */
+.btn-start {
+  font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600;
+  color: #fff; background: var(--c-blue); border: none; cursor: pointer;
+  padding: 0.75rem 2.4rem; border-radius: 999px;
+  transition: background 0.2s, transform 0.15s; margin-top: 0.5rem;
+}
+.btn-start:hover { background: #2a3a7a; transform: scale(1.03); }
+
+/* ── Botón Continuar ─────────────────────────────────────────────────────────── */
+.btn-continue {
+  font-family: 'Poppins', sans-serif; font-size: 15px; font-weight: 600;
+  color: var(--c-dark); background: none; border: none; cursor: pointer;
+  padding: 6px 18px; border-radius: 8px; transition: opacity 0.2s;
+}
+.btn-continue:hover { opacity: 0.55; }
+
+/* ── Ruleta — anillo de 8 puntos ─────────────────────────────────────────────── */
+.roulette-label {
+  font-size: 17px; font-weight: 600; color: var(--c-dark); margin-bottom: 2px;
+}
+
+.roulette-ring-wrap {
+  position: relative;
+  width: 140px; height: 140px;
+  margin: 0 auto 1rem;
+}
+
+/* El anillo gira completo; GSAP anima su rotación */
+.roulette-ring {
+  width: 100%; height: 100%;
+  position: relative;
+}
+
+.roulette-dot {
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+}
+.roulette-dot-red    { background: var(--c-red); }
+.roulette-dot-blue   { background: var(--c-blue); }
+.roulette-dot-yellow { background: var(--c-yellow); }
+.roulette-dot-green  { background: var(--c-green); }
+
+/* Puntero fijo (no rota con el anillo) */
+.roulette-pointer {
+  position: absolute; top: -13px; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 17px solid #1a1a1a;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.30));
+}
+
+/* Resultado del color */
+.roulette-result { font-size: 22px; font-weight: 700; min-height: 34px; transition: color 0.3s; }
+.roulette-result.color-red    { color: var(--c-red); }
+.roulette-result.color-blue   { color: var(--c-blue); }
+.roulette-result.color-yellow { color: var(--c-yellow); }
+.roulette-result.color-green  { color: var(--c-green); }
+
+/* ── Win overlay ─────────────────────────────────────────────────────────────── */
+.win-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,10,10,0.92);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 600; opacity: 0; pointer-events: none;
+}
+.win-overlay.active { opacity: 1; pointer-events: auto; }
+.victory-content { text-align: center; color: #fff; padding: 2rem; }
+.win-title    { font-size: clamp(1.6rem, 7vw, 2.4rem); font-weight: 700; margin-bottom: 0.75rem; }
+.win-subtitle { font-size: clamp(0.9rem, 3.5vw, 1.1rem); font-weight: 300; opacity: 0.82; margin-bottom: 0.5rem; }
+.win-steps    { font-size: 14px; opacity: 0.6; margin-bottom: 2rem; }
+.btn-restart {
+  font-family: 'Poppins', sans-serif; display: inline-block;
+  background: #fff; color: var(--c-dark); text-decoration: none;
+  border: none; cursor: pointer; padding: 0.75rem 2.2rem;
+  border-radius: 999px; font-weight: 600; font-size: 14px; transition: opacity 0.2s;
+}
+.btn-restart:hover { opacity: 0.80; }

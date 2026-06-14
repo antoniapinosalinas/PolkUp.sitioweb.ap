@@ -2,63 +2,94 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Polkup — Experiencia Digital</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Polkup — Experiencia</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --blue: #364a9a; }
-    
-    body, html {
-      width: 100%;
-      height: 100%;
-      font-family: 'Poppins', sans-serif;
-      overflow: hidden; /* Evita que la página tenga scroll */
-      background-color: #000; /* Fondo negro por si el video carga un segundo tarde */
-    }
-
-    /* Botón flotante para regresar al Landing Page */
-    .back-btn {
-      position: absolute;
-      top: 2rem;
-      left: 2rem;
-      background: rgba(255, 255, 255, 0.9);
-      color: var(--blue);
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      padding: 0.6rem 1.5rem;
-      border-radius: 999px;
-      z-index: 100; /* Asegura que el botón siempre esté sobre el video */
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .back-btn:hover {
-      transform: translateX(-3px);
-      background: white;
-    }
-
-    /* El video a pantalla completa */
-    .bg-video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover; /* Hace que el video llene toda la pantalla sin achatarse */
-      z-index: 1;
-    }
-  </style>
+  <link rel="stylesheet" href="experiencia.css">
 </head>
 <body>
 
-  <a href="index.html" class="back-btn">← Volver al inicio</a>
+  <!-- ← Volver -->
+  <a href="index.html" class="back-btn" aria-label="Volver">&#8592;</a>
 
-  <video class="bg-video" autoplay loop muted playsinline>
-    <source src="assets/cta-bg-loop.mp4" type="video/mp4">
-  </video>
+  <!-- HUD: nivel / color / pasos -->
+  <div id="game-hud" class="game-hud">
+    <div class="hud-item">
+      <span class="hud-label">Nivel</span>
+      <span id="hud-level-num" class="hud-value">0</span>
+    </div>
+    <div class="hud-item hud-color-item">
+      <div id="hud-color-dot" class="hud-color-dot"></div>
+      <span id="hud-color-text" class="hud-value">—</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Pasos</span>
+      <span id="hud-steps-num" class="hud-value">0</span>
+    </div>
+  </div>
 
+  <!-- ── Intro Overlay ──────────────────────────────────────── -->
+  <div id="intro-overlay" class="modal-overlay active">
+    <div class="modal">
+      <p class="modal-title intro-brand">PolkUp</p>
+      <p class="modal-subtitle">Ancla y asciende hasta la cima.<br>La ruleta elige tu color en cada turno.</p>
+      <button id="btn-start" class="btn-start">Comenzar</button>
+    </div>
+  </div>
+
+  <!-- ── Ruleta — anillo de 8 puntos ──────────────────────── -->
+  <div id="roulette-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <p class="roulette-label">—</p>
+      <p class="modal-subtitle roulette-sub">el color que debes alcanzar</p>
+      <div class="roulette-ring-wrap">
+        <!-- 8 puntos creados por JS en buildRouletteRing() -->
+        <div id="roulette-ring" class="roulette-ring"></div>
+        <div class="roulette-pointer"></div>
+      </div>
+      <p id="roulette-result" class="roulette-result"></p>
+    </div>
+  </div>
+
+  <!-- ── Modal Condición ───────────────────────────────────── -->
+  <div id="condition-modal" class="modal-overlay hidden">
+    <div id="modal-card" class="modal">
+      <p id="modal-icon" class="modal-icon"></p>
+      <p id="modal-title" class="modal-title-large"></p>
+      <p id="modal-text" class="modal-subtitle"></p>
+      <p id="modal-action-hint" class="modal-hint"></p>
+      <button id="modal-btn" class="btn-continue">Continuar</button>
+    </div>
+  </div>
+
+  <!-- ── Victoria ──────────────────────────────────────────── -->
+  <div id="victory-overlay" class="win-overlay hidden">
+    <div class="victory-content">
+      <h1 class="win-title">¡Llegaste a la cima!</h1>
+      <p class="win-subtitle">Has completado la experiencia PolkUp</p>
+      <p class="win-steps">Completado en <span id="stat-steps">0</span> pasos</p>
+      <button id="btn-restart" class="btn-restart">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <!-- ── Escena del juego (espacio 3D) ────────────────────── -->
+  <div id="game-scene" class="hidden">
+    <div id="tower-scene"></div>
+  </div>
+
+  <!-- ── Rope SVG: overlay 2D fijo, fuera del espacio 3D ── -->
+  <svg id="rope-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <filter id="rope-shadow">
+        <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="rgba(0,0,0,0.18)"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- GSAP (requerido por el motor del juego) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="experiencia.js"></script>
 </body>
 </html>

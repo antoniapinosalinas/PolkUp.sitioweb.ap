@@ -314,6 +314,10 @@ function updateRopeFromScreenPos() { ropeSegs.forEach(updateRopeSeg); }
    F. RULETA — anillo de 8 puntos de color
    ============================================================ */
 
+// Audio de victoria
+const _sfxSuccess = new Audio('assets/succes.mp3');
+_sfxSuccess.volume = 0.85;
+
 // Audio de la ruleta — loop sin gap usando timeupdate
 const _sfxRoulette = new Audio('assets/sonidoruleta.mp3');
 _sfxRoulette.volume = 0;
@@ -832,12 +836,16 @@ function showVictory() {
   // Asegurar que la cuerda sea visible y se actualice mientras la cámara se mueve
   ropeSegs.forEach(seg => gsap.set([seg.path, seg.knot], { opacity: 1 }));
 
-  // ── 1. Confeti masivo y denso (partículas grandes)
+  // ── 1. Sonido de victoria + confeti
+  _sfxSuccess.currentTime = 0;
+  _sfxSuccess.play().catch(() => {});
+
   if (typeof confetti === 'function') {
-    confetti({ particleCount: 220, spread: 90,  startVelocity: 65, scalar: 2.8, origin: { y: 0.6 } });
-    setTimeout(() => confetti({ particleCount: 180, spread: 110, scalar: 3.2, startVelocity: 55, origin: { y: 0.5 } }), 350);
-    setTimeout(() => confetti({ particleCount: 150, spread: 70,  scalar: 2.5, startVelocity: 50, origin: { y: 0.7 } }), 700);
-    setTimeout(() => confetti({ particleCount: 120, spread: 130, scalar: 3.0, startVelocity: 45, origin: { y: 0.4 } }), 1050);
+    const yellowConfetti = { colors: ['#ecc316', '#f5d842', '#fae27a', '#c9a800'] };
+    confetti({ ...yellowConfetti, particleCount: 220, spread: 90,  startVelocity: 65, scalar: 2.8, origin: { y: 0.6 } });
+    setTimeout(() => confetti({ ...yellowConfetti, particleCount: 180, spread: 110, startVelocity: 55, scalar: 3.2, origin: { y: 0.5 } }), 350);
+    setTimeout(() => confetti({ ...yellowConfetti, particleCount: 150, spread: 70,  startVelocity: 50, scalar: 2.5, origin: { y: 0.7 } }), 700);
+    setTimeout(() => confetti({ ...yellowConfetti, particleCount: 120, spread: 130, startVelocity: 45, scalar: 3.0, origin: { y: 0.4 } }), 1050);
   }
 
   // ── 3. Caída dramática uno a uno, de arriba hacia abajo (cima primero)

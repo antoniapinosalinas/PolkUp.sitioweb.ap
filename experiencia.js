@@ -15,9 +15,10 @@
 
 // Tamaños visuales por nivel — se aumentan un ~15% para compensar el
 // foreshortening moderado con perspective:900px
-const NODE_SIZES     = [62, 57, 52, 48, 44, 40, 36, 32, 28, 24];
+const NODE_SIZES     = [76, 70, 64, 58, 53, 48, 43, 38, 32, 26];
 const CAM_DUR        = 0.95;
-const ROULETTE_DELAY = 1100; // ms antes de mostrar la ruleta
+const ROULETTE_DELAY      = 1400; // ms antes de mostrar la ruleta (normal)
+const ROULETTE_DELAY_SLOW = 5000; // ms cuando se activa SLOW_DOWN
 
 const COLORS    = ['red', 'blue', 'yellow', 'green'];
 const COLOR_ES  = { red: 'Rojo', blue: 'Azul', yellow: 'Amarillo', green: 'Verde' };
@@ -36,15 +37,15 @@ const LEVEL_GAP  = 160;
 
 // Niveles: y se calcula como i * LEVEL_GAP
 const LEVEL_DEFS = [
-  { level: 0, radius: 310, count: 8  },
-  { level: 1, radius: 270, count: 7  },
-  { level: 2, radius: 230, count: 7  },
-  { level: 3, radius: 195, count: 6  },
-  { level: 4, radius: 160, count: 6  },
-  { level: 5, radius: 125, count: 5  },
-  { level: 6, radius:  95, count: 5  },
-  { level: 7, radius:  65, count: 4  },
-  { level: 8, radius:  38, count: 3  },
+  { level: 0, radius: 420, count: 8  },
+  { level: 1, radius: 365, count: 7  },
+  { level: 2, radius: 310, count: 7  },
+  { level: 3, radius: 262, count: 6  },
+  { level: 4, radius: 215, count: 6  },
+  { level: 5, radius: 168, count: 5  },
+  { level: 6, radius: 128, count: 5  },
+  { level: 7, radius:  88, count: 4  },
+  { level: 8, radius:  52, count: 4  },
   { level: 9, radius:   0, count: 1  }, // CIMA — único círculo negro sólido
 ].map((d, i) => ({ ...d, y: i * LEVEL_GAP }));
 
@@ -176,8 +177,21 @@ const state = {
   steps:                  0,
   victoryStaticPositions: null,
   slowNextTurn:           false,   // true → próxima ruleta espera el doble
+  zoom:                   1.0,
   camera: { rotY: 0, cameraY: 0 },
 };
+
+const ZOOM_MIN = 0.28;
+const ZOOM_MAX = 1.6;
+
+function applyZoom(z, duration = 0.3) {
+  state.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
+  if (duration > 0) {
+    gsap.to(dom.gameScene, { scale: state.zoom, duration, ease: 'power2.out', overwrite: 'auto' });
+  } else {
+    gsap.set(dom.gameScene, { scale: state.zoom });
+  }
+}
 
 let _cameraTargetRotY = 0;
 let _isDragging       = false;
@@ -316,8 +330,8 @@ function spinRoulette() {
     dom.rouletteResult.textContent = '';
     gsap.set(dom.rouletteRing, { rotation: 0 });
 
-    // Pausa antes de mostrar la ruleta (doble si el turno anterior fue SLOW_DOWN)
-    const delay = state.slowNextTurn ? ROULETTE_DELAY * 2 : ROULETTE_DELAY;
+    // Pausa antes de mostrar la ruleta (larga si el turno anterior fue SLOW_DOWN)
+    const delay = state.slowNextTurn ? ROULETTE_DELAY_SLOW : ROULETTE_DELAY;
     state.slowNextTurn = false;
     setTimeout(() => {
       showOverlay(dom.rouletteOverlay);
@@ -340,7 +354,7 @@ function spinRoulette() {
           setTimeout(() => hideOverlay(dom.rouletteOverlay, () => resolve(color)), 1400);
         },
       });
-    }, ROULETTE_DELAY);
+    }, delay);
   });
 }
 
@@ -695,6 +709,21 @@ function moveToNode(nodeId, checkCond = true) {
 }
 
 async function startNextTurn() {
+  // Si estamos en el penúltimo nivel, la cima es el único destino:
+  // no hay color relevante → saltar la ruleta directamente.
+  const curLevel      = state.nodes[state.activeId].level;
+  const isPenultimate = curLevel === LEVEL_DEFS.length - 2;
+
+  if (isPenultimate) {
+    state.phase        = 'playing';
+    state.currentColor = null;
+    state.validIds     = calcValidIds(state.activeId, null);
+    dom.hudColorDot.style.background = '#1a1a1a';
+    dom.hudColorText.textContent     = '¡A la cima!';
+    refreshNodeStyles();
+    return;
+  }
+
   state.phase = 'rolling';
   const color = await spinRoulette();    // incluye el ROULETTE_DELAY internamente
 
@@ -756,13 +785,29 @@ function showVictory() {
   state.phase = 'win';
   dom.statSteps.textContent = state.steps;
 
-  // ── 0. Hacer visibles TODOS los nodos para que la caída se pueda ver.
-  //      refreshNodeStyles los había ocultado (opacity 0) excepto los 4 niveles
-  //      visibles. Sin esto la animación de caída es invisible.
+  // ── 0. Zoom out + recentrar cámara para ver la torre completa.
+  //      La cámara está en y = cima.y (1440px), lo que deja la base fuera de pantalla.
+  //      Animamos la cámara al punto medio de la torre para que todo quede centrado
+  //      antes de que los nodos caigan.
+  {
+    const totalY    = (LEVEL_DEFS.length - 1) * LEVEL_GAP;   // alto total de la torre
+    const midY      = totalY / 2;                              // punto medio (720px)
+    // Ajuste fino: con top:52% necesitamos restar ~2% de pantalla para centrar mejor
+    const targetY   = midY - window.innerHeight * 0.02;
+    applyZoom(0.35, 2.2);
+    gsap.to(dom.towerScene, {
+      y: targetY, duration: 2.2, ease: 'power2.inOut', overwrite: 'auto',
+      onUpdate: updateRopeFromScreenPos,
+    });
+  }
+
+  // ── 0b. Hacer visibles TODOS los nodos para que la caída se pueda ver.
   state.nodes.forEach(node => {
     if (node.wrap) gsap.set(node.wrap, { opacity: 1 });
     if (node.el)   gsap.set(node.el,   { scale: 1, y: 0 });
   });
+  // Asegurar que la cuerda sea visible y se actualice mientras la cámara se mueve
+  ropeSegs.forEach(seg => gsap.set([seg.path, seg.knot], { opacity: 1 }));
 
   // ── 1. Confeti masivo y denso (partículas grandes)
   if (typeof confetti === 'function') {
@@ -772,16 +817,18 @@ function showVictory() {
     setTimeout(() => confetti({ particleCount: 120, spread: 130, scalar: 3.0, startVelocity: 45, origin: { y: 0.4 } }), 1050);
   }
 
-  // ── 2. Congelar posiciones de la cuerda (para que no siga a los nodos al caer)
-  state.victoryStaticPositions = {};
-  state.nodes.forEach(node => {
-    const pos = getNodeCenter(node);
-    if (pos) state.victoryStaticPositions[node.id] = pos;
-  });
-  ropeSegs.forEach(seg => gsap.set([seg.path, seg.knot], { opacity: 1 }));
-
   // ── 3. Caída dramática uno a uno, de arriba hacia abajo (cima primero)
+  //      Las posiciones de la cuerda se congelan AQUÍ, después de que la cámara
+  //      terminó de moverse (2.2s de zoom) → los nodos ya están en pantalla.
   setTimeout(() => {
+    // Congelar posiciones AHORA (cámara ya centrada, todos los nodos visibles)
+    state.victoryStaticPositions = {};
+    state.nodes.forEach(node => {
+      const pos = getNodeCenter(node);
+      if (pos) state.victoryStaticPositions[node.id] = pos;
+    });
+    updateRopeFromScreenPos(); // dibujar la cuerda una última vez con posiciones correctas
+
     const sorted = [...state.nodes].sort((a, b) => b.level - a.level);
 
     // Encontrar el índice real del último nodo con elemento válido
@@ -833,8 +880,10 @@ function startGame() {
   state.phase        = 'animating'; // no interacción hasta que termine el intro
   state.camera       = { rotY: 0, cameraY: 0 };
   state.victoryStaticPositions = null;
+  state.slowNextTurn = false;
   _cameraTargetRotY  = 0;
 
+  applyZoom(1.0, 0.5);
   gsap.set(dom.towerScene, { clearProps: 'rotateY,y' });
 
   const defs = dom.ropeSvg.querySelector('defs');
@@ -882,8 +931,49 @@ function startGame() {
 document.addEventListener('DOMContentLoaded', () => {
   initDOM();
 
+  // ── Video de transición ───────────────────────────────────────────────────
+  const videoWrap = document.getElementById('video-transition');
+  const video     = document.getElementById('transition-video');
+
+  function showIntroAfterVideo() {
+    // 1. Fade out del video overlay
+    videoWrap.classList.add('fade-out');
+    videoWrap.addEventListener('transitionend', () => videoWrap.remove(), { once: true });
+
+    // 2. Hacer visible el juego (body ya visible desde DOMContentLoaded)
+    document.body.style.opacity = '1';
+
+    // 3. A los 2s mostrar la ventana intro
+    setTimeout(() => {
+      dom.introOverlay.classList.remove('hidden');
+      dom.introOverlay.classList.add('active');
+      gsap.fromTo(dom.introOverlay,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6, ease: 'power2.out' }
+      );
+    }, 2000);
+  }
+
+  if (video) {
+    // Fallback: si el video tarda >30s o falla, mostrar intro de todas formas
+    const fallback = setTimeout(showIntroAfterVideo, 30000);
+
+    video.addEventListener('ended', () => {
+      clearTimeout(fallback);   // ← cancelar el fallback para que no se dispare de nuevo
+      showIntroAfterVideo();
+    }, { once: true });
+
+    video.addEventListener('error', () => {
+      clearTimeout(fallback);
+      showIntroAfterVideo();
+    }, { once: true });
+  } else {
+    // Sin video: mostrar intro directamente
+    showIntroAfterVideo();
+  }
+
   document.body.style.opacity    = '0';
-  document.body.style.transition = 'opacity 0.7s ease';
+  document.body.style.transition = 'opacity 0.5s ease';
   requestAnimationFrame(() =>
     requestAnimationFrame(() => { document.body.style.opacity = '1'; })
   );
@@ -960,11 +1050,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('mousedown',  e => { if (!e.target.closest(DRAG_IGNORE)) dragStart(e.clientX); });
   document.addEventListener('mousemove',  e => dragMove(e.clientX));
   document.addEventListener('mouseup',    dragEnd);
+
   document.addEventListener('touchstart', e => {
-    if (!e.target.closest(DRAG_IGNORE)) dragStart(e.touches[0].clientX);
+    if (e.touches.length === 1 && !e.target.closest(DRAG_IGNORE)) {
+      dragStart(e.touches[0].clientX);
+    }
   }, { passive: true });
+
   document.addEventListener('touchmove', e => {
     if (drag.active) { e.preventDefault(); dragMove(e.touches[0].clientX); }
   }, { passive: false });
+
   document.addEventListener('touchend', dragEnd);
 });

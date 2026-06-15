@@ -314,15 +314,25 @@ function updateRopeFromScreenPos() { ropeSegs.forEach(updateRopeSeg); }
    F. RULETA — anillo de 8 puntos de color
    ============================================================ */
 
+// Audio de la ruleta — loop sin gap usando timeupdate
+const _sfxRoulette = new Audio('assets/sonidoruleta.mp3');
+_sfxRoulette.volume = 0;
+_sfxRoulette.addEventListener('timeupdate', function () {
+  // Reiniciar 0.18s antes del final para evitar el gap del loop nativo
+  if (this.duration && this.currentTime > this.duration - 0.18) {
+    this.currentTime = 0;
+  }
+});
+
 function spinRoulette() {
   return new Promise(resolve => {
     const color    = COLORS[Math.floor(Math.random() * COLORS.length)];
     const colorIdx = COLORS.indexOf(color);
 
     // Dos posiciones en el anillo para este color (colorIdx y colorIdx + 4)
-    const targetPos = Math.random() < 0.5 ? colorIdx : colorIdx + 4;
-    const dotAngle  = targetPos * 45;                     // °  (0° = arriba/pointer)
-    const extraSpins = 3 + Math.floor(Math.random() * 2); // 3-4 vueltas completas
+    const targetPos  = Math.random() < 0.5 ? colorIdx : colorIdx + 4;
+    const dotAngle   = targetPos * 45;
+    const extraSpins = 5 + Math.floor(Math.random() * 2); // más vueltas para verse rápido
     const finalRot   = -(extraSpins * 360 + dotAngle);
 
     dom.rouletteLabel.textContent  = '—';
@@ -337,11 +347,24 @@ function spinRoulette() {
       showOverlay(dom.rouletteOverlay);
       dom.rouletteLabel.textContent = 'Girando...';
 
+      // Reproducir sonido desde el inicio con fade in
+      _sfxRoulette.currentTime = 0;
+      _sfxRoulette.volume      = 0;
+      _sfxRoulette.loop        = true;
+      _sfxRoulette.play().catch(() => {});   // ignorar bloqueo de autoplay
+      gsap.to(_sfxRoulette, { volume: 0.75, duration: 0.5, ease: 'power1.out' });
+
       gsap.to(dom.rouletteRing, {
         rotation: finalRot,
-        duration: 7,
-        ease:     'power3.inOut',
+        duration: 4.5,
+        ease:     'power2.inOut',
         onComplete: () => {
+          // Fade out del sonido al frenar
+          gsap.to(_sfxRoulette, {
+            volume: 0, duration: 0.8, ease: 'power2.in',
+            onComplete: () => { _sfxRoulette.pause(); },
+          });
+
           dom.rouletteLabel.textContent  = 'Tu color:';
           dom.rouletteResult.className   = `color-${color}`;
           dom.rouletteResult.textContent = COLOR_ES[color];

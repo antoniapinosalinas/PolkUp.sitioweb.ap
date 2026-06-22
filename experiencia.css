@@ -20,6 +20,52 @@ html, body {
 
 .hidden { display: none !important; }
 
+/* ── Hint de rotación ────────────────────────────────────────────────────────── */
+#rotate-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.8rem;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+#rotate-hint.visible { opacity: 1; }
+
+.rotate-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--c-blue);
+  opacity: 0.38;
+  user-select: none;
+}
+.rotate-arrow span {
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.rotate-arrow--left {
+  animation: hint-nudge-left 1.8s ease-in-out infinite;
+}
+.rotate-arrow--right {
+  animation: hint-nudge-right 1.8s ease-in-out infinite;
+  animation-delay: 0.2s;
+}
+@keyframes hint-nudge-left {
+  0%, 100% { transform: translateX(0);    opacity: 0.38; }
+  50%       { transform: translateX(-8px); opacity: 0.65; }
+}
+@keyframes hint-nudge-right {
+  0%, 100% { transform: translateX(0);   opacity: 0.38; }
+  50%       { transform: translateX(8px); opacity: 0.65; }
+}
+
 /* ── Video de transición ─────────────────────────────────────────────────────── */
 #video-transition {
   position: fixed;

@@ -176,7 +176,8 @@ const state = {
   validIds:               [],
   steps:                  0,
   victoryStaticPositions: null,
-  slowNextTurn:           false,   // true → próxima ruleta espera el doble
+  slowNextTurn:           false,
+  hintShown:              false,   // true → ya se mostró el hint de rotación
   zoom:                   1.0,
   camera: { rotY: 0, cameraY: 0 },
 };
@@ -195,6 +196,7 @@ function applyZoom(z, duration = 0.3) {
 
 let _cameraTargetRotY = 0;
 let _isDragging       = false;
+let _actualCamRotY    = 0;   // rotación CSS real en cada frame (puede diferir de state.camera.rotY durante animación)
 
 
 /* ============================================================
@@ -217,8 +219,17 @@ function animateCameraTo(node, duration, onDone) {
   gsap.killTweensOf(dom.towerScene);
   gsap.to(dom.towerScene, {
     rotateY: targetRotY, y: node.y, duration, ease: 'power3.inOut',
-    onUpdate:   updateRopeFromScreenPos,
-    onComplete: () => { updateRopeFromScreenPos(); if (onDone) onDone(); },
+    onUpdate: function () {
+      // Leer la rotación CSS REAL en cada frame para que los puntos intermedios de la cuerda
+      // coincidan con las posiciones getBoundingClientRect() (que también usan el CSS real).
+      _actualCamRotY = gsap.getProperty(dom.towerScene, 'rotateY') || 0;
+      updateRopeFromScreenPos();
+    },
+    onComplete: () => {
+      _actualCamRotY = targetRotY;
+      updateRopeFromScreenPos();
+      if (onDone) onDone();
+    },
   });
 }
 
@@ -237,12 +248,83 @@ function getNodeCenter(node) {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }
 
-function buildRopePath(a, b) {
+/**
+ * Construye el path SVG de la cuerda entre dos nodos.
+ *
+ * En lugar de una bezier 2D simple (que cruza el interior del cilindro cuando
+ * los nodos están en caras opuestas), muestrea N puntos sobre la superficie
+ * 3D del cilindro, los proyecta a pantalla con perspectiva y los une como
+ * polilínea. Esto garantiza que la cuerda siempre rodee el exterior.
+ *
+ * Proyección usada (igual que CSS perspective:900px):
+ *   screenX = cx  + worldX · (900 / (900 − worldZ))
+ *   screenY = lerp(a.y, b.y, t)  +  seno de gravedad
+ *
+ * El arco más corto alrededor del cilindro se obtiene normalizando dα a [−π, π].
+ */
+/**
+ * Construye el path SVG de la cuerda entre dos nodos.
+ *
+ * Estrategia: un único cubic bezier por segmento.
+ * Los control points se desvían perpendicularmente a la línea A→B en función
+ * del arco angular (dα) que separa los dos nodos en el cilindro.
+ * Esto sugiere visualmente "rodear la torre" sin proyectar coordenadas 3D,
+ * lo que elimina los overshoots y loops que producía el muestreo del cilindro.
+ *
+ * bow (desvío lateral) = sign(dα) × sin(|dα|/2) × escala × radio_medio
+ *   · sin(|dα|/2) crece de 0 (misma cara) a 1 (cara opuesta) de forma monotónica.
+ *   · El signo indica dirección horaria/antihoraria.
+ *   · Doble tope: relativo a la longitud del segmento + tope absoluto en px.
+ */
+function buildRopePath(a, b, nodeA, nodeB) {
   const dist = Math.hypot(b.x - a.x, b.y - a.y);
-  const sag  = Math.min(dist * 0.14, 22);
-  const mx   = (a.x + b.x) / 2;
-  const my   = (a.y + b.y) / 2 + sag;
-  return `M ${a.x.toFixed(1)} ${a.y.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+  const cx   = window.innerWidth / 2;
+
+  // Tramo final a la Meta: cuerda tensa, desvío mínimo
+  const isCima = (nodeB?.isCima === true);
+  const maxSag = Math.min(dist * 0.09, 12) * (isCima ? 0.2 : 1.0);
+
+  // Fallback sin datos 3D
+  if (!nodeA || !nodeB) {
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2 + maxSag;
+    const ox = (mx - cx) * 0.18;
+    return `M ${a.x.toFixed(1)},${a.y.toFixed(1)} Q ${(mx + ox).toFixed(1)},${my.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}`;
+  }
+
+  // Delta angular normalizado a [−π, π] usando la rotación CSS real del frame
+  const camRot = _actualCamRotY;
+  const αA = ((nodeA.angleDeg || 0) + camRot) * Math.PI / 180;
+  const αB = ((nodeB.angleDeg || 0) + camRot) * Math.PI / 180;
+  let dα = αB - αA;
+  while (dα >  Math.PI) dα -= 2 * Math.PI;
+  while (dα < -Math.PI) dα += 2 * Math.PI;
+
+  const rA   = nodeA._levelRadius || 0;
+  const rB   = nodeB._levelRadius || 0;
+  const rAvg = (rA + rB) / 2;
+
+  // ── Desvío lateral (bow) ────────────────────────────────────────────────────
+  // sin(|dα|/2) crece de 0→1 conforme el arco va de 0→π, sin oscilaciones.
+  // Tope relativo: no más de 45% de la longitud del segmento (evita arcos exagerados).
+  // Tope absoluto en px: garantía final sin importar radios ni distancias.
+  const BOW_SCALE   = isCima ? 0.28 : 0.42;
+  const BOW_MAX_ABS = isCima ? 28   : 58;     // px — límite duro
+  const bowMag = Math.sin(Math.abs(dα) / 2) * Math.max(rAvg * BOW_SCALE, isCima ? 6 : 18);
+  const bow    = Math.sign(dα) * Math.min(bowMag, dist * 0.45, BOW_MAX_ABS);
+
+  // Vector perpendicular unitario a la línea A→B (rotación +90°)
+  const len   = Math.max(dist, 1);
+  const perpX = -((b.y - a.y) / len);
+  const perpY =   (b.x - a.x) / len;
+
+  // Control points a 30 % y 70 % del segmento + desvío perpendicular + sag sinusoidal
+  const cp1x = a.x + (b.x - a.x) * 0.30 + perpX * bow;
+  const cp1y = a.y + (b.y - a.y) * 0.30 + perpY * bow + maxSag * Math.sin(0.30 * Math.PI);
+  const cp2x = a.x + (b.x - a.x) * 0.70 + perpX * bow;
+  const cp2y = a.y + (b.y - a.y) * 0.70 + perpY * bow + maxSag * Math.sin(0.70 * Math.PI);
+
+  return `M ${a.x.toFixed(1)},${a.y.toFixed(1)} C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}`;
 }
 
 function addRopeSeg(fromId, toId) {
@@ -293,7 +375,7 @@ function updateRopeSeg(seg) {
   const a = getNodeCenter(nodeA);
   const b = getNodeCenter(nodeB);
   if (!a || !b) return;
-  seg.path.setAttribute('d', buildRopePath(a, b));
+  seg.path.setAttribute('d', buildRopePath(a, b, nodeA, nodeB));
   seg.knot.setAttribute('cx', b.x.toFixed(1));
   seg.knot.setAttribute('cy', b.y.toFixed(1));
 
@@ -762,6 +844,12 @@ async function startNextTurn() {
   dom.hudColorText.textContent     = COLOR_ES[color];
 
   refreshNodeStyles();
+
+  // Mostrar hint de rotación solo la primera vez que se revela un color
+  if (!state.hintShown) {
+    state.hintShown = true;
+    showRotateHint();
+  }
 }
 
 function onNodeClick(nodeId) {
@@ -912,7 +1000,9 @@ function startGame() {
   state.camera       = { rotY: 0, cameraY: 0 };
   state.victoryStaticPositions = null;
   state.slowNextTurn = false;
+  state.hintShown    = false;
   _cameraTargetRotY  = 0;
+  _actualCamRotY     = 0;
 
   applyZoom(1.0, 0.5);
   gsap.set(dom.towerScene, { clearProps: 'rotateY,y' });
@@ -958,6 +1048,26 @@ function startGame() {
 /* ============================================================
    N. PUNTO DE ENTRADA
    ============================================================ */
+
+/* ── Hint de rotación ──────────────────────────────────────────────────────── */
+let _hintTimeout = null;
+
+function showRotateHint() {
+  const el = document.getElementById('rotate-hint');
+  if (!el) return;
+  el.classList.remove('hidden');
+  requestAnimationFrame(() => el.classList.add('visible'));
+  // Desaparece solo a los 3.5 s
+  _hintTimeout = setTimeout(() => hideRotateHint(), 3500);
+}
+
+function hideRotateHint() {
+  const el = document.getElementById('rotate-hint');
+  if (!el || !el.classList.contains('visible')) return;
+  clearTimeout(_hintTimeout);
+  el.classList.remove('visible');
+  el.addEventListener('transitionend', () => el.classList.add('hidden'), { once: true });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initDOM();
@@ -1037,6 +1147,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const drag = { active: false, startX: 0, lastX: 0, startRotY: 0, velocity: 0 };
 
   function dragStart(clientX) {
+    hideRotateHint();
     if (state.phase === 'intro' || state.phase === 'win') return;
     drag.active    = true;
     drag.startX    = clientX;
@@ -1056,6 +1167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     drag.lastX        = clientX;
     state.camera.rotY = drag.startRotY + dx * DRAG_SENSITIVITY;
     _cameraTargetRotY = state.camera.rotY;
+    _actualCamRotY    = state.camera.rotY;   // en drag el CSS se aplica de inmediato → sincronizar
     gsap.set(dom.towerScene, { rotateY: state.camera.rotY });
     updateRopeFromScreenPos();
   }
@@ -1068,8 +1180,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetRotY = state.camera.rotY + drag.velocity * INERTIA_FACTOR;
       gsap.to(dom.towerScene, {
         rotateY: targetRotY, duration: 1.1, ease: 'power2.out',
-        onUpdate:   updateRopeFromScreenPos,
-        onComplete: () => { state.camera.rotY = targetRotY; _cameraTargetRotY = targetRotY; },
+        onUpdate: function () {
+          _actualCamRotY = gsap.getProperty(dom.towerScene, 'rotateY') || 0;
+          updateRopeFromScreenPos();
+        },
+        onComplete: () => {
+          state.camera.rotY = targetRotY;
+          _cameraTargetRotY = targetRotY;
+          _actualCamRotY    = targetRotY;
+        },
       });
     }
     setTimeout(() => { _isDragging = false; }, 50);

@@ -1,3 +1,71 @@
+/* ================================================================
+   TRANSICIÓN RULETA — al volver al landing desde la experiencia
+   Misma animación que la transición de entrada a la experiencia:
+   la ruleta gira en el centro ~2 s y luego se expande hacia afuera.
+   Solo se ejecuta si #roulette-transition está visible (es decir,
+   cuando NO existe la clase .no-intro en <html>).
+   ================================================================ */
+(function landingRouletteTransition() {
+  const overlay = document.getElementById('roulette-transition');
+  if (!overlay) return;
+
+  // Si no se viene desde la experiencia, el overlay está oculto por CSS → quitar y salir
+  if (document.documentElement.classList.contains('no-intro') || typeof gsap === 'undefined') {
+    overlay.remove();
+    return;
+  }
+
+  const wrap = overlay.querySelector('.rt-ring-wrap');
+  const ring = document.getElementById('rt-ring');
+
+  // Construir los 8 puntos del anillo (R B Y G × 2)
+  const colors  = ['red', 'blue', 'yellow', 'green', 'red', 'blue', 'yellow', 'green'];
+  const orbit   = 54;
+  const dotSize = 22;
+  ring.innerHTML = '';
+  colors.forEach((c, i) => {
+    const rad = (i * 45) * Math.PI / 180;
+    const x   = orbit * Math.sin(rad);
+    const y   = -orbit * Math.cos(rad);
+    const dot = document.createElement('div');
+    dot.className = `roulette-dot roulette-dot-${c}`;
+    dot.style.cssText = [
+      `width:${dotSize}px`,
+      `height:${dotSize}px`,
+      `left:calc(50% + ${x.toFixed(1)}px - ${dotSize / 2}px)`,
+      `top:calc(50% + ${y.toFixed(1)}px - ${dotSize / 2}px)`,
+    ].join(';');
+    ring.appendChild(dot);
+  });
+
+  // Sonido (se ignora si el navegador bloquea autoplay)
+  let sfx;
+  try {
+    sfx = new Audio('assets/sonidoruleta.mp3');
+    sfx.volume = 0;
+    sfx.loop   = true;
+    sfx.play().then(() => gsap.to(sfx, { volume: 0.6, duration: 0.6 })).catch(() => {});
+  } catch (e) {}
+
+  gsap.set(wrap, { scale: 0.1, opacity: 1, transformOrigin: '50% 50%' });
+  gsap.set(ring, { rotation: 0, transformOrigin: '50% 50%' });
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      if (sfx) gsap.to(sfx, { volume: 0, duration: 0.4, onComplete: () => { try { sfx.pause(); } catch (e) {} } });
+      overlay.remove();
+      history.replaceState(null, '', location.pathname); // limpia el ?from=exp de la URL
+    },
+  });
+
+  tl.to(ring,    { rotation: 360 * 5, duration: 4.6, ease: 'power1.inOut' }, 0);
+  tl.to(wrap,    { scale: 1,    duration: 0.8, ease: 'back.out(1.6)' }, 0);
+  tl.to(wrap,    { scale: 1.25, duration: 1.2, ease: 'power1.inOut' }, 0.8);
+  tl.to(wrap,    { scale: 16,   duration: 2.6, ease: 'power2.in' }, 2.0);
+  tl.to(overlay, { opacity: 0,  duration: 1.2, ease: 'power2.in' }, 3.4);
+})();
+
+
 // NODOS: Tamaños aumentados y posiciones para llenar el encuadre
 const nodeData = [
   {color:'green', ringed:true, size:110, px:12, py:15},

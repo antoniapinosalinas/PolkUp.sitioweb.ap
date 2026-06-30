@@ -1072,46 +1072,66 @@ function hideRotateHint() {
 document.addEventListener('DOMContentLoaded', () => {
   initDOM();
 
-  // ── Video de transición ───────────────────────────────────────────────────
-  const videoWrap = document.getElementById('video-transition');
-  const video     = document.getElementById('transition-video');
-
-  function showIntroAfterVideo() {
-    // 1. Fade out del video overlay
-    videoWrap.classList.add('fade-out');
-    videoWrap.addEventListener('transitionend', () => videoWrap.remove(), { once: true });
-
-    // 2. Hacer visible el juego (body ya visible desde DOMContentLoaded)
+  // ── Transición de carga: ruleta que gira y se expande (6 s) ────────────────
+  function showIntro() {
     document.body.style.opacity = '1';
-
-    // 3. A los 2s mostrar la ventana intro
-    setTimeout(() => {
-      dom.introOverlay.classList.remove('hidden');
-      dom.introOverlay.classList.add('active');
-      gsap.fromTo(dom.introOverlay,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.6, ease: 'power2.out' }
-      );
-    }, 2000);
+    dom.introOverlay.classList.remove('hidden');
+    dom.introOverlay.classList.add('active');
+    gsap.fromTo(dom.introOverlay,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.6, ease: 'power2.out' }
+    );
   }
 
-  if (video) {
-    // Fallback: si el video tarda >30s o falla, mostrar intro de todas formas
-    const fallback = setTimeout(showIntroAfterVideo, 30000);
+  /** Anima la ruleta de carga: aparece desde el centro, gira acelerando
+      y se expande hacia afuera hasta revelar el juego. Dura 6 s. */
+  function runRouletteTransition(onDone) {
+    const overlay = document.getElementById('roulette-transition');
+    if (!overlay) { onDone(); return; }
 
-    video.addEventListener('ended', () => {
-      clearTimeout(fallback);   // ← cancelar el fallback para que no se dispare de nuevo
-      showIntroAfterVideo();
-    }, { once: true });
+    const wrap = overlay.querySelector('.rt-ring-wrap');
+    const ring = document.getElementById('rt-ring');
+    buildRouletteRing(ring); // reutiliza el mismo anillo de 8 puntos del juego
 
-    video.addEventListener('error', () => {
-      clearTimeout(fallback);
-      showIntroAfterVideo();
-    }, { once: true });
-  } else {
-    // Sin video: mostrar intro directamente
-    showIntroAfterVideo();
+    // Sonido de la ruleta (fade in/out). Se ignora si el navegador bloquea autoplay.
+    try {
+      _sfxRoulette.currentTime = 0;
+      _sfxRoulette.volume      = 0;
+      _sfxRoulette.loop        = true;
+      _sfxRoulette.play().catch(() => {});
+      gsap.to(_sfxRoulette, { volume: 0.6, duration: 0.6, ease: 'power1.out' });
+    } catch (e) {}
+
+    gsap.set(wrap, { scale: 0.1, opacity: 1, transformOrigin: '50% 50%' });
+    gsap.set(ring, { rotation: 0, transformOrigin: '50% 50%' });
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        gsap.to(_sfxRoulette, {
+          volume: 0, duration: 0.5, ease: 'power2.in',
+          onComplete: () => { try { _sfxRoulette.pause(); } catch (e) {} },
+        });
+        onDone();
+      },
+    });
+
+    // Giro continuo más lento durante toda la transición
+    tl.to(ring, { rotation: 360 * 5, duration: 4.6, ease: 'power1.inOut' }, 0);
+    // 1) Aparece desde el centro con un pequeño rebote
+    tl.to(wrap, { scale: 1, duration: 0.8, ease: 'back.out(1.6)' }, 0);
+    // 2) Gira en el centro ~2 s (crece muy suave hasta los 2 s)
+    tl.to(wrap, { scale: 1.25, duration: 1.2, ease: 'power1.inOut' }, 0.8);
+    // 3) Se expande hacia afuera más lento (desde los 2 s)
+    tl.to(wrap, { scale: 16, duration: 2.6, ease: 'power2.in' }, 2.0);
+    // 4) Fade out del overlay para revelar el juego
+    tl.to(overlay, { opacity: 0, duration: 1.2, ease: 'power2.in' }, 3.4);
   }
+
+  runRouletteTransition(() => {
+    const overlay = document.getElementById('roulette-transition');
+    if (overlay) overlay.remove();
+    setTimeout(showIntro, 200);
+  });
 
   document.body.style.opacity    = '0';
   document.body.style.transition = 'opacity 0.5s ease';

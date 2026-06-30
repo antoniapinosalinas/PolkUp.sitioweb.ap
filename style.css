@@ -3,9 +3,80 @@
 html { scroll-behavior: smooth; }
 
 /* Cuerpo general de la página */
-body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(--dark); overflow-x: hidden; }
+body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(--dark); overflow-x: clip; }
 
 /* --- HERO Y CAPAS --- */
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+
+/* === Navbar superior === */
+#site-nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 0.85rem 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.nav-brand { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.nav-dot { width: 11px; height: 11px; border-radius: 50%; transition: transform 0.2s ease; }
+.nav-dot--red { background: var(--red); }
+.nav-dot--blue { background: var(--blue); }
+.nav-dot--yellow { background: var(--yellow); }
+.nav-dot--green { background: var(--green); }
+.nav-brand:hover .nav-dot { transform: scale(1.2); }
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem 1.3rem;
+  margin: 0;
+  padding: 0;
+}
+.nav-links li { position: relative; }
+.nav-links li + li::before {
+  content: "";
+  position: absolute;
+  left: -0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.nav-links a {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dark);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.nav-links a:hover { color: var(--blue); }
+
+@media (max-width: 900px) {
+  .nav-links { gap: 0.5rem 1rem; }
+  .nav-links a { font-size: 0.62rem; letter-spacing: 0.1em; }
+  .nav-links li + li::before { left: -0.5rem; }
+}
+@media (max-width: 760px) {
+  #site-nav { padding: 0.65rem 1rem; gap: 0.8rem; }
+  .nav-links { gap: 0.4rem 0.8rem; }
+  .nav-links a { font-size: 0.56rem; letter-spacing: 0.06em; }
+}
+
 #hero { position: relative; height: 100vh; min-height: 640px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #fff; }
 #string-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 #nodes-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
@@ -39,7 +110,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--light); color: var(
   transform: translateY(-4px) scale(1.04);
   box-shadow: 0 16px 40px rgba(54, 74, 154, 0.5);
 }
-.hint { pointer-events: none; margin-top: 0.75rem; font-size: 0.72rem; color: #999; letter-spacing: 0.05em; }
+.hint { pointer-events: none; position: absolute; top: calc(100% + clamp(9rem, 22vw, 13rem)); left: 0; right: 0; text-align: center; font-size: 0.72rem; color: #999; letter-spacing: 0.05em; }
 
 /* --- ESTILOS DE LOS NODOS (CÍRCULOS) --- */
 .node { position: absolute; border-radius: 50%; cursor: pointer; pointer-events: all; display: flex; align-items: center; justify-content: center; will-change: transform; z-index: 3; transition: filter 0.3s ease, transform 0.2s; }
@@ -445,8 +516,8 @@ footer { position: relative; overflow: hidden; padding: 7rem 2rem 3rem; backgrou
 
 /* === FOOTER === */
 footer {
-  padding: 2rem;
-  background-color: #111; 
+  padding: 3.2rem 2rem 2.5rem;
+  background-color: #fff; 
   text-align: center;
   position: relative;
   z-index: 10;
@@ -457,6 +528,154 @@ footer {
   font-size: 0.75rem;
   color: #666;
   letter-spacing: 0.05em;
+}
+
+/* === Footer: línea de circulitos de colores que lo separa === */
+.footer-dots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 16px;
+  background-image:
+    radial-gradient(circle at center, var(--red)    3.5px, transparent 4px),
+    radial-gradient(circle at center, var(--blue)   3.5px, transparent 4px),
+    radial-gradient(circle at center, var(--yellow) 3.5px, transparent 4px),
+    radial-gradient(circle at center, var(--green)  3.5px, transparent 4px);
+  background-size: 88px 16px;
+  background-position: 0 center, 22px center, 44px center, 66px center;
+  background-repeat: repeat-x;
+}
+
+/* === Transición de ruleta al volver al landing === */
+#roulette-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  overflow: hidden;
+}
+.no-intro #roulette-transition { display: none; }
+
+.rt-ring-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  will-change: transform;
+}
+.roulette-ring { width: 100%; height: 100%; position: relative; }
+.roulette-dot {
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+.roulette-dot-red    { background: var(--red); }
+.roulette-dot-blue   { background: var(--blue); }
+.roulette-dot-yellow { background: var(--yellow); }
+.roulette-dot-green  { background: var(--green); }
+
+/* === Footer: columnas (logos | créditos) === */
+.footer-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 2.8rem;
+  text-align: left;
+}
+
+.footer-col { display: flex; flex-direction: column; justify-content: center; }
+.footer-col--logos { flex: 0 0 auto; }
+.footer-col--text  { flex: 1; min-width: 280px; }
+
+.footer-heading {
+  display: block;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--blue);
+  margin-bottom: 1rem;
+}
+
+.footer-divider {
+  width: 1px;
+  align-self: stretch;
+  background: #e7e7e7;
+  flex-shrink: 0;
+}
+
+.footer-logos {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+}
+
+.footer-logo { display: block; width: auto; }
+.footer-logo--ead  { height: 64px; }
+.footer-logo--pucv { height: 72px; }
+
+.footer-text {
+  margin: 0;
+  text-align: justify;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: #555;
+  letter-spacing: 0.02em;
+}
+.footer-text strong { color: var(--dark); font-weight: 600; }
+
+.wiki-cta {
+  margin-top: 3.2rem;
+  text-align: center;
+}
+.wiki-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.8rem;
+  border: 1.5px solid var(--blue);
+  border-radius: 999px;
+  color: var(--blue);
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+.wiki-btn svg { flex-shrink: 0; }
+.wiki-btn:hover {
+  background: var(--blue);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(54, 74, 154, 0.32);
+}
+
+.footer-bottom {
+  max-width: 1000px;
+  margin: 2.2rem auto 0;
+  padding-top: 1.3rem;
+  border-top: 1px solid #eee;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.72rem;
+  color: #aaa;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 2rem; }
+  .footer-divider { width: 60%; height: 1px; align-self: center; }
+  .footer-col { align-items: center; }
+  .footer-text { text-align: center; }
 }
 
 /* === Responsive (Video Experiencia) === */

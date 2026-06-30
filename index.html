@@ -5,10 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Polkup — Ancla y Asciende a la cima</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&display=swap" rel="stylesheet">  <link rel="stylesheet" href="style.css">
+  <script>
+    /* Marca la página para NO mostrar la transición de ruleta salvo que se venga desde la experiencia */
+    (function () {
+      var fromExp = /[?&]from=/.test(location.search) || /experiencia/i.test(document.referrer);
+      if (!fromExp) document.documentElement.classList.add('no-intro');
+    })();
+  </script>
 </head>
 <body>
 
+<div id="roulette-transition" aria-hidden="true">
+  <div class="rt-ring-wrap"><div id="rt-ring" class="roulette-ring"></div></div>
+</div>
+
 <div id="scroll-progress" aria-hidden="true"></div>
+
+<nav id="site-nav" aria-label="Navegación principal">
+  <a href="#hero" class="nav-brand" aria-label="Inicio">
+    <span class="nav-dot nav-dot--red"></span>
+    <span class="nav-dot nav-dot--blue"></span>
+    <span class="nav-dot nav-dot--yellow"></span>
+    <span class="nav-dot nav-dot--green"></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#fundamento">Fundamento</a></li>
+    <li><a href="#pix">Metodología</a></li>
+    <li><a href="#components">Interfaz Expresiva</a></li>
+    <li><a href="#gallery">Material Fotográfico</a></li>
+    <li><a href="#video-section">Material Audiovisual</a></li>
+    <li><a href="#experiencia-cta">Experiencia Web</a></li>
+  </ul>
+</nav>
 
 <section id="hero">
   <canvas id="string-canvas"></canvas>
@@ -23,7 +51,7 @@
 </section>
 
 
-<section class="content-section">
+<section id="fundamento" class="content-section">
   <div class="bg-glow bg-yellow" aria-hidden="true"></div>
   <div class="bg-glow bg-red"    aria-hidden="true"></div>
   <div class="bg-glow bg-blue"   aria-hidden="true"></div>
@@ -57,7 +85,7 @@
 
 <div id="components">
   <div class="inner">
-    <div class="section-label">Página Experimental</div>
+    <div class="section-label">Interfaz Expresiva</div>
     <h2 class="section-title">Componentes Digitales</h2>
     <p class="section-body" style="margin: 0 auto 3rem auto;">La idea principal de este proyecto es tomar las sensaciones y los momentos de mayor tensión que vimos en las partituras de interacción (PiX) y llevarlos a una página web experimental.</p>
 
@@ -91,6 +119,16 @@
         <p>El riesgo de caída y las cartas de condición se representan mediante una alerta que rompe el flujo visual y fuerza al usuario a retroceder de nivel, emulando la frustración táctica del juego real.</p>
       </div>
     </div>
+
+    <div class="wiki-cta">
+      <a href="https://wiki.ead.pucv.cl/U3_Taller_IxD_-_Antonia_Pino_Salinas#Entrega_Final" class="wiki-btn" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <span>Ver el proceso de este proyecto en la Wiki</span>
+      </a>
+    </div>
   </div>
 </div>
 
@@ -102,16 +140,16 @@
     <div class="gallery-carousel" aria-label="Galería de fotos del juego">
       <div class="gallery-track">
         <div class="gallery-slide active">
-          <img src="assets/imagen 1 juego.png" alt="Foto del juego PolkUp 1">
+          <img src="assets/carrusel-1.png" alt="Foto del juego PolkUp 1">
         </div>
         <div class="gallery-slide next">
-          <img src="assets/imagen 2 juego.png" alt="Foto del juego PolkUp 2">
+          <img src="assets/carrusel-2.png" alt="Foto del juego PolkUp 2">
         </div>
         <div class="gallery-slide hidden">
-          <img src="assets/imagen 3 juego.png" alt="Foto del juego PolkUp 3">
+          <img src="assets/carrusel-3.png" alt="Foto del juego PolkUp 3">
         </div>
         <div class="gallery-slide prev">
-          <img src="assets/imagen 4 juego.png" alt="Foto del juego PolkUp 4">
+          <img src="assets/carrusel-4.png" alt="Foto del juego PolkUp 4">
         </div>
       </div>
       <div class="gallery-controls">
@@ -139,14 +177,13 @@
     <p class="section-body" style="margin: 0 auto 3rem auto;">Un recorrido por la experiencia Polkup en acción.</p>
     
     <div class="video-wrapper">
-      <iframe 
-        src="https://www.youtube.com/embed/ozF1nGwIRvQ?rel=0" 
-        title="Experiencia PolkUp" 
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen
-        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-      </iframe>
+      <video 
+        controls 
+        playsinline 
+        preload="metadata"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; background: #000;">
+        <source src="assets/video-juego.mp4" type="video/mp4">
+      </video>
     </div>
     
   </div>
@@ -170,9 +207,30 @@
 </div>
 
 <footer>
-  <div class="copyright">© 2026 PolkUp. Taller de Diseño de Interacción. Antonia Pino. Todos los derechos reservados.</div>
+  <div class="footer-dots" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <div class="footer-col footer-col--logos">
+      <div class="footer-logos">
+        <img src="assets/logo-ead-full.png" alt="e[ad] Escuela de Arquitectura y Diseño · Pontificia Universidad Católica de Valparaíso" class="footer-logo footer-logo--ead">
+        <img src="assets/logo-pucv.png" alt="Pontificia Universidad Católica de Valparaíso" class="footer-logo footer-logo--pucv">
+      </div>
+    </div>
+
+    <div class="footer-divider" aria-hidden="true"></div>
+
+    <div class="footer-col footer-col--text">
+      <p class="footer-text">
+        La presente página fue creada por <strong>Antonia Pino Salinas</strong>, en el Taller de Diseño de Interacción, guíada por las profesoras <strong>Katherine Exss Cid</strong> y <strong>Javiera Ruiz Mayer</strong>.<br>
+        Escuela de Arquitectura y Diseño, Pontificia Universidad Católica de Valparaíso.<br>
+        Junio de 2026.
+      </p>
+    </div>
+  </div>
+
+  <div class="footer-bottom">© 2026 PolkUp · Taller de Diseño de Interacción</div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="script.js"></script>
 
 </body>

@@ -66,6 +66,39 @@ html, body {
   50%       { transform: translateX(8px); opacity: 0.65; }
 }
 
+/* ── Aviso de sonido en la intro ─────────────────────────────────────────────── */
+.sound-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.9rem auto 0.2rem;
+  max-width: 320px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--c-blue);
+}
+.sound-hint svg { flex-shrink: 0; }
+
+/* ── Transición de carga: ruleta girando que se expande ──────────────────────── */
+#roulette-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-bg);
+  overflow: hidden;
+}
+.rt-ring-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  will-change: transform;
+}
+
 /* ── Video de transición ─────────────────────────────────────────────────────── */
 #video-transition {
   position: fixed;

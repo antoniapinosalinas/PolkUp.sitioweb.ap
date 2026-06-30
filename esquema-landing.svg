@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 980" font-family="Poppins, 'Alegreya Sans', sans-serif">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&amp;family=Alegreya+Sans:wght@400;500;700&amp;display=swap');
+      text { fill:#111; }
+      .ttl   { font-size:22px; font-weight:600; }
+      .sub   { font-size:13px; font-weight:400; fill:#666; }
+      .bxt   { font-size:15px; font-weight:600; }
+      .bxs   { font-size:11.5px; font-weight:400; fill:#555; }
+      .micro { font-size:12px; font-weight:400; fill:#222; }
+      .leg   { font-size:12px; font-weight:400; fill:#222; }
+      .tag   { font-size:11px; font-weight:600; fill:#888; letter-spacing:.5px; }
+      .node  { fill:#fff; stroke:#111; stroke-width:2; }
+      .mbox  { fill:#fafafa; stroke:#111; stroke-width:1.5; stroke-dasharray:5 4; }
+      .flow  { stroke:#111; stroke-width:2; fill:none; }
+      .opt   { stroke:#111; stroke-width:1.5; fill:none; stroke-dasharray:5 4; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#111"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="940" height="980" fill="#ffffff"/>
+
+  <!-- Encabezado -->
+  <text class="ttl" x="60" y="50">Estructura del Landing &#183; PolkUp</text>
+  <text class="sub" x="61" y="72">Flujo de secciones y microinteracciones m&#225;s destacadas</text>
+
+  <!-- Leyenda -->
+  <rect class="node" x="612" y="26" width="288" height="64" rx="12" style="stroke-width:1.5"/>
+  <line class="flow" x1="630" y1="48" x2="672" y2="48" marker-end="url(#arrow)"/>
+  <text class="leg" x="682" y="52">Flujo lineal (scroll / navegaci&#243;n)</text>
+  <line class="opt" x1="630" y1="72" x2="672" y2="72"/>
+  <text class="leg" x="682" y="76">Microinteracci&#243;n (opci&#243;n)</text>
+
+  <!-- Barra de progreso global -->
+  <rect class="mbox" x="90" y="104" width="740" height="30" rx="10"/>
+  <text class="micro" x="110" y="123">&#9656; Barra de progreso de scroll &#8212; global, recorre toda la p&#225;gina</text>
+  <line class="opt" x1="230" y1="134" x2="230" y2="150"/>
+
+  <!-- ===== COLUMNA FLUJO (spine) ===== -->
+  <!-- Hero -->
+  <rect class="node" x="90" y="150" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="178" text-anchor="middle">Hero</text>
+  <text class="bxs" x="230" y="196" text-anchor="middle">Hilos de lana + nodos interactivos</text>
+  <!-- Fundamento -->
+  <rect class="node" x="90" y="246" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="274" text-anchor="middle">Fundamento</text>
+  <text class="bxs" x="230" y="292" text-anchor="middle">Traducci&#243;n digital de la experiencia</text>
+  <!-- PiX -->
+  <rect class="node" x="90" y="342" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="370" text-anchor="middle">PiX &#8212; Partitura</text>
+  <text class="bxs" x="230" y="388" text-anchor="middle">Mapa de interacci&#243;n (iframe)</text>
+  <!-- Componentes -->
+  <rect class="node" x="90" y="438" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="466" text-anchor="middle">Componentes</text>
+  <text class="bxs" x="230" y="484" text-anchor="middle">3 tarjetas digitales</text>
+  <!-- Galeria -->
+  <rect class="node" x="90" y="534" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="562" text-anchor="middle">Galer&#237;a</text>
+  <text class="bxs" x="230" y="580" text-anchor="middle">Carrusel de fotos</text>
+  <!-- Video -->
+  <rect class="node" x="90" y="630" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="658" text-anchor="middle">Video</text>
+  <text class="bxs" x="230" y="676" text-anchor="middle">Recorrido en YouTube</text>
+  <!-- CTA -->
+  <rect class="node" x="90" y="726" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="754" text-anchor="middle">CTA Experiencia</text>
+  <text class="bxs" x="230" y="772" text-anchor="middle">Invita a la web interactiva</text>
+  <!-- Footer -->
+  <rect class="node" x="90" y="822" width="280" height="60" rx="14"/>
+  <text class="bxt" x="230" y="850" text-anchor="middle">Footer</text>
+  <text class="bxs" x="230" y="868" text-anchor="middle">Cr&#233;ditos</text>
+
+  <!-- Flechas del flujo -->
+  <line class="flow" x1="230" y1="210" x2="230" y2="246" marker-end="url(#arrow)"/>
+  <line class="flow" x1="230" y1="306" x2="230" y2="342" marker-end="url(#arrow)"/>
+  <line class="flow" x1="230" y1="402" x2="230" y2="438" marker-end="url(#arrow)"/>
+  <line class="flow" x1="230" y1="498" x2="230" y2="534" marker-end="url(#arrow)"/>
+  <line class="flow" x1="230" y1="594" x2="230" y2="630" marker-end="url(#arrow)"/>
+  <line class="flow" x1="230" y1="690" x2="230" y2="726" marker-end="url(#arrow)"/>
+  <line class="flow" x1="230" y1="786" x2="230" y2="822" marker-end="url(#arrow)"/>
+
+  <!-- ===== COLUMNA MICROINTERACCIONES ===== -->
+  <text class="tag" x="470" y="146">MICROINTERACCIONES</text>
+
+  <!-- Hero A -->
+  <rect class="mbox" x="470" y="150" width="400" height="34" rx="10"/>
+  <text class="micro" x="486" y="171">Clic en nodos &#8594; se tensa el hilo de lana (canvas)</text>
+  <line class="opt" x1="370" y1="172" x2="470" y2="167"/>
+  <!-- Hero B -->
+  <rect class="mbox" x="470" y="192" width="400" height="34" rx="10"/>
+  <text class="micro" x="486" y="213">Parallax + desvanecido del hero al hacer scroll</text>
+  <line class="opt" x1="370" y1="190" x2="470" y2="209"/>
+
+  <!-- Reveal -->
+  <rect class="mbox" x="470" y="252" width="400" height="50" rx="10"/>
+  <text class="micro" x="486" y="272">Reveal al scroll: t&#237;tulos en cascada, subrayado de</text>
+  <text class="micro" x="486" y="290">etiqueta y aparici&#243;n fade-up (varias secciones)</text>
+  <line class="opt" x1="370" y1="276" x2="470" y2="277"/>
+
+  <!-- PiX -->
+  <rect class="mbox" x="470" y="348" width="400" height="34" rx="10"/>
+  <text class="micro" x="486" y="369">Partitura PiX embebida e interactiva</text>
+  <line class="opt" x1="370" y1="372" x2="470" y2="365"/>
+
+  <!-- Componentes -->
+  <rect class="mbox" x="470" y="444" width="400" height="50" rx="10"/>
+  <text class="micro" x="486" y="464">Tilt 3D al pasar el cursor sobre las tarjetas</text>
+  <text class="micro" x="486" y="482">+ entrada escalonada (stagger)</text>
+  <line class="opt" x1="370" y1="468" x2="470" y2="469"/>
+
+  <!-- Galeria -->
+  <rect class="mbox" x="470" y="540" width="400" height="50" rx="10"/>
+  <text class="micro" x="486" y="560">Carrusel coverflow 3D: flechas &#8249; &#8250;, puntos</text>
+  <text class="micro" x="486" y="578">y clic directo en la imagen</text>
+  <line class="opt" x1="370" y1="564" x2="470" y2="565"/>
+
+  <!-- CTA -->
+  <rect class="mbox" x="470" y="738" width="400" height="34" rx="10"/>
+  <text class="micro" x="486" y="759">Video en loop de fondo</text>
+  <line class="opt" x1="370" y1="756" x2="470" y2="755"/>
+</svg>

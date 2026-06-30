@@ -3,9 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script>
+    (function () {
+      var V = '20260701';
+      if (new URLSearchParams(location.search).get('v') !== V) {
+        var u = new URL(location.href);
+        u.searchParams.set('v', V);
+        location.replace(u.toString());
+      }
+    })();
+  </script>
   <title>Polkup — Experiencia</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="experiencia.css?v=20260630">
+  <link rel="stylesheet" href="experiencia.css?v=20260701">
 </head>
 <body>
 
@@ -124,6 +137,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-  <script src="experiencia.js?v=20260630"></script>
+  <script src="experiencia.js?v=20260701"></script>
 </body>
 </html>

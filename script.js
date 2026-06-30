@@ -76,7 +76,7 @@ const nodeData = [
   {color:'green', ringed:false, size:80, px:86, py:45},
   {color:'green', ringed:false, size:85, px:22, py:80}, 
   {color:'red', ringed:true, size:120, px:10, py:85},   
-  {color:'blue', ringed:false, size:90, px:50, py:78},  
+  {color:'blue', ringed:false, size:90, px:50, py:90},
   {color:'yellow',ringed:true, size:115, px:85, py:82}, 
 ];
 

@@ -3,9 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script>
+    (function () {
+      var V = '20260703';
+      if (new URLSearchParams(location.search).get('v') !== V) {
+        var u = new URL(location.href);
+        u.searchParams.set('v', V);
+        location.replace(u.toString());
+      }
+    })();
+  </script>
   <title>Polkup — Ancla y Asciende a la cima</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260630">
+  <link rel="stylesheet" href="style.css?v=20260703">
   <script>
     /* Marca la página para NO mostrar la transición de ruleta salvo que se venga desde la experiencia */
     (function () {
@@ -232,7 +245,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="script.js?v=20260630"></script>
+<script src="script.js?v=20260703"></script>
 
 </body>
 </html>

@@ -404,11 +404,74 @@ _sfxSuccess.volume = 0.85;
 const _sfxRoulette = new Audio('assets/sonidoruleta.mp3');
 _sfxRoulette.volume = 0;
 _sfxRoulette.addEventListener('timeupdate', function () {
-  // Reiniciar 0.18s antes del final para evitar el gap del loop nativo
   if (this.duration && this.currentTime > this.duration - 0.18) {
     this.currentTime = 0;
   }
 });
+
+const SOUND = { enabled: true };
+
+function isSoundEnabled() { return SOUND.enabled; }
+
+function muteAllSfx() {
+  gsap.killTweensOf(_sfxRoulette);
+  gsap.killTweensOf(_sfxSuccess);
+  _sfxRoulette.pause();
+  _sfxRoulette.volume = 0;
+  _sfxSuccess.pause();
+  _sfxSuccess.volume = 0;
+}
+
+function gsapFadeAudio(audio, toVol, duration, options = {}) {
+  return gsap.to(audio, {
+    volume: isSoundEnabled() ? toVol : 0,
+    duration,
+    ease: options.ease || 'power1.out',
+    onComplete: options.onComplete,
+  });
+}
+
+function playRouletteSfx(targetVol) {
+  if (!isSoundEnabled()) return;
+  _sfxRoulette.currentTime = 0;
+  _sfxRoulette.volume = 0;
+  _sfxRoulette.loop = true;
+  _sfxRoulette.play().catch(() => {});
+  gsapFadeAudio(_sfxRoulette, targetVol, 0.5, { ease: 'power1.out' });
+}
+
+function playSuccessSfx() {
+  if (!isSoundEnabled()) return;
+  _sfxSuccess.currentTime = 0;
+  _sfxSuccess.volume = 0.85;
+  _sfxSuccess.play().catch(() => {});
+}
+
+function updateSoundToggleUI() {
+  const btn = document.getElementById('sound-toggle');
+  if (!btn) return;
+  const on = isSoundEnabled();
+  btn.classList.toggle('is-muted', !on);
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  btn.setAttribute('aria-label', on ? 'Desactivar sonido' : 'Activar sonido');
+}
+
+function initSoundToggle() {
+  const btn = document.getElementById('sound-toggle');
+  if (!btn) return;
+  updateSoundToggleUI();
+  btn.addEventListener('click', () => {
+    SOUND.enabled = !SOUND.enabled;
+    if (!SOUND.enabled) muteAllSfx();
+    else _sfxSuccess.volume = 0.85;
+    updateSoundToggleUI();
+  });
+}
+
+function showSoundToggle() {
+  const btn = document.getElementById('sound-toggle');
+  if (btn) btn.classList.remove('hidden');
+}
 
 function spinRoulette() {
   return new Promise(resolve => {
@@ -434,11 +497,7 @@ function spinRoulette() {
       dom.rouletteLabel.textContent = 'Girando...';
 
       // Reproducir sonido desde el inicio con fade in
-      _sfxRoulette.currentTime = 0;
-      _sfxRoulette.volume      = 0;
-      _sfxRoulette.loop        = true;
-      _sfxRoulette.play().catch(() => {});   // ignorar bloqueo de autoplay
-      gsap.to(_sfxRoulette, { volume: 0.75, duration: 0.5, ease: 'power1.out' });
+      playRouletteSfx(0.75);
 
       gsap.to(dom.rouletteRing, {
         rotation: finalRot,
@@ -446,8 +505,8 @@ function spinRoulette() {
         ease:     'power2.inOut',
         onComplete: () => {
           // Fade out del sonido al frenar
-          gsap.to(_sfxRoulette, {
-            volume: 0, duration: 0.8, ease: 'power2.in',
+          gsapFadeAudio(_sfxRoulette, 0, 0.8, {
+            ease: 'power2.in',
             onComplete: () => { _sfxRoulette.pause(); },
           });
 
@@ -925,8 +984,7 @@ function showVictory() {
   ropeSegs.forEach(seg => gsap.set([seg.path, seg.knot], { opacity: 1 }));
 
   // ── 1. Sonido de victoria + confeti
-  _sfxSuccess.currentTime = 0;
-  _sfxSuccess.play().catch(() => {});
+  playSuccessSfx();
 
   if (typeof confetti === 'function') {
     const yellowConfetti = { colors: ['#ecc316', '#f5d842', '#fae27a', '#c9a800'] };
@@ -1071,12 +1129,14 @@ function hideRotateHint() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initDOM();
+  initSoundToggle();
 
   // ── Transición de carga: ruleta que gira y se expande (6 s) ────────────────
   function showIntro() {
     document.body.style.opacity = '1';
     dom.introOverlay.classList.remove('hidden');
     dom.introOverlay.classList.add('active');
+    showSoundToggle();
     gsap.fromTo(dom.introOverlay,
       { opacity: 0 },
       { opacity: 1, duration: 0.6, ease: 'power2.out' }
@@ -1094,21 +1154,15 @@ document.addEventListener('DOMContentLoaded', () => {
     buildRouletteRing(ring); // reutiliza el mismo anillo de 8 puntos del juego
 
     // Sonido de la ruleta (fade in/out). Se ignora si el navegador bloquea autoplay.
-    try {
-      _sfxRoulette.currentTime = 0;
-      _sfxRoulette.volume      = 0;
-      _sfxRoulette.loop        = true;
-      _sfxRoulette.play().catch(() => {});
-      gsap.to(_sfxRoulette, { volume: 0.6, duration: 0.6, ease: 'power1.out' });
-    } catch (e) {}
+    try { playRouletteSfx(0.6); } catch (e) {}
 
     gsap.set(wrap, { scale: 0.1, opacity: 1, transformOrigin: '50% 50%' });
     gsap.set(ring, { rotation: 0, transformOrigin: '50% 50%' });
 
     const tl = gsap.timeline({
       onComplete: () => {
-        gsap.to(_sfxRoulette, {
-          volume: 0, duration: 0.5, ease: 'power2.in',
+        gsapFadeAudio(_sfxRoulette, 0, 0.5, {
+          ease: 'power2.in',
           onComplete: () => { try { _sfxRoulette.pause(); } catch (e) {} },
         });
         onDone();
